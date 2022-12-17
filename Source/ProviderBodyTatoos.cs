@@ -10,11 +10,6 @@ public class ProviderBodyTattoos {
     protected List<TattooDef> humanlike;
     protected Dictionary<ThingDef, List<TattooDef>> lookup = new();
 
-    public ProviderAlienRaces AlienRaceProvider {
-        get;
-        set;
-    }
-
     protected List<TattooDef> Humanlike {
         get {
             if (humanlike == null) {
@@ -58,11 +53,6 @@ public class ProviderBodyTattoos {
 
     // TODO: Handle tattoos for alien races
     protected List<TattooDef> InitializeForRace(ThingDef raceDef) {
-        var alienRace = AlienRaceProvider.GetAlienRace(raceDef);
-        if (alienRace == null) {
-            return Humanlike;
-        }
-
         return Humanlike;
     }
 

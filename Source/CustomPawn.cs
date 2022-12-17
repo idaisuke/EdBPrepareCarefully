@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +17,6 @@ public class ApparelConflict {
 
 public class CustomPawn {
     protected Dictionary<PawnLayer, ThingDef> acceptedApparel = new();
-    protected AlienRace alienRace;
     protected List<ApparelConflict> apparelConflicts = new();
     protected string apparelConflictText;
     public List<CustomBodyPart> bodyParts = new();
@@ -31,8 +29,6 @@ public class CustomPawn {
     protected Dictionary<SkillDef, int> currentSkillLevels = new();
     protected CustomFaction faction;
 
-    protected CustomHeadType headType;
-
     // A GUID provides a unique identifier for the CustomPawn.
     protected string id;
 
@@ -44,7 +40,7 @@ public class CustomPawn {
     // Keep track of the most recently selected adulthood option so that if the user updates the pawn's
     // age in a way that switches them back and forth from adult to child (which nulls out the adulthood
     // value in the Pawn), we can remember what the value was and restore it.
-    protected Backstory lastSelectedAdulthoodBackstory = null;
+    protected BackstoryDef lastSelectedAdulthoodBackstory;
     protected FactionDef originalFactionDef;
     protected PawnKindDef originalKindDef;
 
@@ -109,8 +105,6 @@ public class CustomPawn {
         }
     }
 
-    public AlienRace AlienRace => alienRace;
-
     public bool HasCustomBodyParts => bodyParts.Count > 0;
 
     public List<Injury> Injuries {
@@ -133,9 +127,9 @@ public class CustomPawn {
     }
 
     public Color HairColor {
-        get => pawn.story.hairColor;
+        get => pawn.story.HairColor;
         set {
-            pawn.story.hairColor = value;
+            pawn.story.HairColor = value;
             MarkPortraitAsDirty();
         }
     }
@@ -168,7 +162,7 @@ public class CustomPawn {
         }
     }
 
-    public Backstory LastSelectedAdulthoodBackstory {
+    public BackstoryDef LastSelectedAdulthoodBackstory {
         get {
             if (lastSelectedAdulthoodBackstory != null) {
                 return lastSelectedAdulthoodBackstory;
@@ -267,11 +261,11 @@ public class CustomPawn {
     public string Label {
         get {
             var name = pawn.Name as NameTriple;
-            if (pawn.story.adulthood == null) {
+            if (pawn.story.Adulthood == null) {
                 return name.Nick;
             }
 
-            return name.Nick + ", " + pawn.story.adulthood.TitleShortFor(Gender);
+            return name.Nick + ", " + pawn.story.Adulthood.TitleShortFor(Gender);
         }
     }
 
@@ -279,16 +273,7 @@ public class CustomPawn {
 
     public IEnumerable<Implant> Implants => implants;
 
-    public bool IsAdult {
-        get {
-            var provider = PrepareCarefully.Instance.Providers.AlienRaces;
-            if (alienRace != null) {
-                return BiologicalAge >= (int)alienRace.MinAgeForAdulthood;
-            }
-
-            return BiologicalAge >= (int)provider.DefaultMinAgeForAdulthood;
-        }
-    }
+    public bool IsAdult => pawn.DevelopmentalStage.Adult();
 
     // Stores the original PawnKindDef of the pawn.  This value automatically changes when you assign
     // a pawn to the FactionOf.Colony, so we want to preserve it for faction pawns that are created from
@@ -325,35 +310,35 @@ public class CustomPawn {
     public string ProfessionLabelShort {
         get {
             if (IsAdult) {
-                return Adulthood.TitleShortCapFor(Gender);
+                return Adulthood.TitleShortFor(Gender).CapitalizeFirst();
             }
 
-            return Childhood.TitleShortCapFor(Gender);
+            return Childhood.TitleShortFor(Gender).CapitalizeFirst();
         }
     }
 
     public string ApparelConflict => apparelConflictText;
 
-    public Backstory Childhood {
-        get => pawn.story.childhood;
+    public BackstoryDef Childhood {
+        get => pawn.story.Childhood;
         set {
-            pawn.story.childhood = value;
+            pawn.story.Childhood = value;
             ResetBackstories();
         }
     }
 
-    public Backstory Adulthood {
-        get => pawn.story.adulthood;
+    public BackstoryDef Adulthood {
+        get => pawn.story.Adulthood;
         set {
             if (value != null) {
                 LastSelectedAdulthoodBackstory = value;
             }
 
             if (IsAdult) {
-                pawn.story.adulthood = value;
+                pawn.story.Adulthood = value;
             }
             else {
-                pawn.story.adulthood = null;
+                pawn.story.Adulthood = null;
             }
 
             ResetBackstories();
@@ -362,34 +347,11 @@ public class CustomPawn {
 
     public bool HasAdulthoodBackstory => Adulthood != null;
 
-    public CustomHeadType HeadType {
-        get => headType;
+    public HeadTypeDef HeadType {
+        get => pawn.story.headType;
         set {
-            headType = value;
-            //Logger.Debug("Setting pawn headType to " + value);
-            pawn.story.crownType = value.CrownType != CrownType.Undefined ? value.CrownType : CrownType.Average;
-            var alienComp = ProviderAlienRaces.FindAlienCompForPawn(pawn);
-            if (alienComp != null) {
-                ReflectionUtil.GetPublicField(alienComp, "crownType").SetValue(alienComp, headType.AlienCrownType);
-            }
+            pawn.story.headType = value;
 
-            ResetCachedHead();
-            MarkPortraitAsDirty();
-        }
-    }
-
-    public string HeadGraphicPath {
-        get => pawn.story.HeadGraphicPath;
-        set {
-            var headType = PrepareCarefully.Instance.Providers.HeadTypes.FindHeadType(pawn.def, value);
-            if (headType != null) {
-                HeadType = headType;
-            }
-            else {
-                Logger.Warning("Could not find a head type for the graphic path: " + value);
-            }
-
-            ResetCachedHead();
             MarkPortraitAsDirty();
         }
     }
@@ -429,47 +391,22 @@ public class CustomPawn {
     public Color SkinColor {
         get => pawn.story.SkinColor;
         set {
-            if (alienRace != null) {
-                var alienComp = ProviderAlienRaces.FindAlienCompForPawn(pawn);
-                if (alienComp == null) {
-                    return;
-                }
-
-                MarkPortraitAsDirty();
-
-                // Pre 1.2
-                QuietReflectionUtil.SetFieldValue(alienComp, "skinColor", value);
-                QuietReflectionUtil.SetFieldValue(alienComp, "skinColorSecond", value);
-
-                // 1.2 and later
-                var dictionaryObject = QuietReflectionUtil.GetPropertyValue<object>(alienComp, "ColorChannels");
-                if (dictionaryObject == null) {
-                    return;
-                }
-
-                var colorChannelsDictionary = dictionaryObject as IDictionary;
-                if (colorChannelsDictionary == null) {
-                    return;
-                }
-
-                if (colorChannelsDictionary.Contains("skin")) {
-                    var skinColorObject = colorChannelsDictionary["skin"];
-                    ReflectionUtil.SetFieldValue(skinColorObject, "first", value);
-                    if (!alienRace.HasSecondaryColor) {
-                        ReflectionUtil.SetFieldValue(skinColorObject, "second", value);
-                    }
-                }
-            }
+            MelaninLevel = PawnColorUtils.FindMelaninValueFromColor(value);
+            pawn.story.SkinColorBase = value;
         }
     }
 
     public float MelaninLevel {
-        get => pawn.story.melanin;
+        get => pawn.genes.GetMelaninGene().minMelanin;
         set {
-            pawn.story.melanin = value;
-            if (alienRace != null) {
-                SkinColor = PawnSkinColors.GetSkinColor(value);
+            var melaninGene =
+                pawn.genes.GenesListForReading.Find(it => it.def.endogeneCategory == EndogeneCategory.Melanin);
+
+            if (melaninGene != null) {
+                pawn.genes.RemoveGene(melaninGene);
             }
+
+            pawn.genes.AddGene(PawnSkinColors.GetSkinColorGene(value), false);
 
             MarkPortraitAsDirty();
         }
@@ -500,12 +437,12 @@ public class CustomPawn {
             long years = pawn.ageTracker.AgeBiologicalYears;
             var diff = value - years;
             pawn.ageTracker.AgeBiologicalTicks += diff * 3600000L;
-            if (IsAdult && pawn.story.adulthood == null) {
-                pawn.story.adulthood = LastSelectedAdulthoodBackstory;
+            if (IsAdult && pawn.story.Adulthood == null) {
+                pawn.story.Adulthood = LastSelectedAdulthoodBackstory;
                 ResetBackstories();
             }
-            else if (!IsAdult && pawn.story.adulthood != null) {
-                pawn.story.adulthood = null;
+            else if (!IsAdult && pawn.story.Adulthood != null) {
+                pawn.story.Adulthood = null;
                 ResetBackstories();
             }
 
@@ -591,28 +528,15 @@ public class CustomPawn {
             }
         }
 
-        // Initialize head type.
-        var headType = PrepareCarefully.Instance.Providers.HeadTypes.FindHeadTypeForPawn(pawn);
-        if (headType != null) {
-            this.headType = headType;
-        }
-        else {
-            this.headType = null;
-        }
-
         // Reset CustomPawn cached values.
         ResetApparel();
         ResetCachedIncapableOf();
-        ResetCachedHead();
 
         // Copy the adulthood backstory or set a random one if it's null.
-        LastSelectedAdulthoodBackstory = pawn.story.adulthood;
+        LastSelectedAdulthoodBackstory = pawn.story.Adulthood;
 
         // Evaluate all hediffs.
         InitializeInjuriesAndImplantsFromPawn(pawn);
-
-        // Set the alien race, if any.
-        alienRace = PrepareCarefully.Instance.Providers.AlienRaces.GetAlienRace(pawn.def);
 
         // Clear all of the pawn caches.
         ClearPawnCaches();
@@ -752,7 +676,7 @@ public class CustomPawn {
 
     public void CopyAppearance(Pawn pawn) {
         HairDef = pawn.story.hairDef;
-        this.pawn.story.hairColor = pawn.story.hairColor;
+        this.pawn.story.HairColor = pawn.story.HairColor;
         this.pawn.story.bodyType = pawn.story.bodyType;
         if (pawn.style != null && Pawn.style != null) {
             Beard = pawn.style.beardDef;
@@ -760,8 +684,18 @@ public class CustomPawn {
             BodyTattoo = pawn.style.BodyTattoo;
         }
 
-        HeadGraphicPath = pawn.story.HeadGraphicPath;
-        MelaninLevel = pawn.story.melanin;
+        foreach (var gene in this.pawn.genes.GenesListForReading) {
+            this.pawn.genes.RemoveGene(gene);
+        }
+
+        foreach (var gene in pawn.genes.Xenogenes) {
+            this.pawn.genes.AddGene(gene.def, true);
+        }
+
+        foreach (var gene in pawn.genes.Endogenes) {
+            this.pawn.genes.AddGene(gene.def, false);
+        }
+
         Pawn.apparel.DestroyAll();
         foreach (var layer in PrepareCarefully.Instance.Providers.PawnLayers.GetLayersForPawn(this)) {
             if (layer.Apparel) {
@@ -818,15 +752,15 @@ public class CustomPawn {
 
     protected int ComputeSkillModifier(SkillDef def) {
         var value = 0;
-        if (pawn.story != null && pawn.story.childhood != null && pawn.story.childhood.skillGainsResolved != null) {
-            if (pawn.story.childhood.skillGainsResolved.ContainsKey(def)) {
-                value += pawn.story.childhood.skillGainsResolved[def];
+        if (pawn.story != null && pawn.story.Childhood != null && pawn.story.Childhood.skillGains != null) {
+            if (pawn.story.Childhood.skillGains.ContainsKey(def)) {
+                value += pawn.story.Childhood.skillGains[def];
             }
         }
 
-        if (pawn.story != null && pawn.story.adulthood != null && pawn.story.adulthood.skillGainsResolved != null) {
-            if (pawn.story.adulthood.skillGainsResolved.ContainsKey(def)) {
-                value += pawn.story.adulthood.skillGainsResolved[def];
+        if (pawn.story != null && pawn.story.Adulthood != null && pawn.story.Adulthood.skillGains != null) {
+            if (pawn.story.Adulthood.skillGains.ContainsKey(def)) {
+                value += pawn.story.Adulthood.skillGains[def];
             }
         }
 
@@ -1321,20 +1255,6 @@ public class CustomPawn {
         }) != null;
     }
 
-    protected void ResetCachedHead() {
-        if (headType != null) {
-            // Get the matching head type for the pawn's current gender.  We do this in case the user switches the
-            // gender, swapping to the correct head type if necessary.
-            var filteredHeadType =
-                PrepareCarefully.Instance.Providers.HeadTypes.FindHeadTypeForGender(pawn.def, headType, Gender);
-            if (filteredHeadType == null) {
-                Logger.Warning("No filtered head type found"); //TODO
-            }
-
-            SetHeadGraphicPathOnPawn(pawn, filteredHeadType.GraphicPath);
-        }
-    }
-
     protected void ResetGender() {
         var bodyTypes = PrepareCarefully.Instance.Providers.BodyTypes.GetBodyTypesForPawn(this);
         if (pawn.gender == Gender.Female) {
@@ -1363,8 +1283,6 @@ public class CustomPawn {
                 }
             }
         }
-
-        ResetCachedHead();
     }
 
     public string ResetCachedIncapableOf() {

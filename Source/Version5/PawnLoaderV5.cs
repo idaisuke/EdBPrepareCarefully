@@ -315,10 +315,7 @@ public class PawnLoaderV5 {
             partialFailure = true;
         }
 
-        if (!String.IsNullOrWhiteSpace(record.headGraphicPath)) {
-            pawn.HeadGraphicPath = record.headGraphicPath;
-        }
-
+        pawn.HeadType = ToHeadTypeFromHeadGraphicPath(record.headGraphicPath);
         pawn.HairColor = record.hairColor;
 
         if (record.melanin >= 0.0f) {
@@ -328,7 +325,7 @@ public class PawnLoaderV5 {
             pawn.MelaninLevel = PawnColorUtils.FindMelaninValueFromColor(record.skinColor);
         }
 
-        Backstory backstory = FindBackstory(record.childhood);
+        var backstory = FindBackstory(record.childhood);
         if (backstory != null) {
             pawn.Childhood = backstory;
         }
@@ -683,17 +680,15 @@ public class PawnLoaderV5 {
         return null;
     }
 
-    private Backstory FindBackstory(string name) {
-        Backstory matchingBackstory = BackstoryDatabase.allBackstories.Values.ToList().Find((Backstory b) => {
-            return b.identifier.Equals(name);
-        });
+    private BackstoryDef FindBackstory(string name) {
+        var matchingBackstory = DefDatabase<BackstoryDef>.AllDefsListForReading.Find(it => it.defName == name);
         // If we couldn't find a matching backstory, look for one with the same identifier, but a different version number at the end.
         if (matchingBackstory == null) {
             var expression = new Regex("\\d+$");
             var backstoryMinusVersioning = expression.Replace(name, "");
-            matchingBackstory = BackstoryDatabase.allBackstories.Values.ToList().Find((Backstory b) => {
-                return b.identifier.StartsWith(backstoryMinusVersioning);
-            });
+            matchingBackstory = DefDatabase<BackstoryDef>.AllDefsListForReading.Find(it =>
+                it.defName.StartsWith(backstoryMinusVersioning)
+            );
             if (matchingBackstory != null) {
                 Logger.Message("Found replacement backstory.  Using " + matchingBackstory.identifier + " in place of " +
                                name);
@@ -770,6 +765,36 @@ public class PawnLoaderV5 {
         }
 
         return null;
+    }
+
+    private static HeadTypeDef ToHeadTypeFromHeadGraphicPath(string headGraphicPath) {
+        var gender = headGraphicPath.Contains("Female_")
+            ? 1
+            : 0;
+        var width = headGraphicPath.Contains("Narrow_")
+            ? 1
+            : 0;
+        var jaw = headGraphicPath.Contains("_Wide")
+            ? 2
+            : headGraphicPath.Contains("_Pointy")
+                ? 1
+                : 0;
+
+        return (gender, width, jaw) switch {
+            (0, 0, 0) => DefDatabase<HeadTypeDef>.GetNamed("Male_AverageNormal"),
+            (0, 0, 1) => DefDatabase<HeadTypeDef>.GetNamed("Male_AveragePointy"),
+            (0, 0, 2) => DefDatabase<HeadTypeDef>.GetNamed("Male_AverageWide"),
+            (0, 1, 0) => DefDatabase<HeadTypeDef>.GetNamed("Male_NarrowNormal"),
+            (0, 1, 1) => DefDatabase<HeadTypeDef>.GetNamed("Male_NarrowPointy"),
+            (0, 1, 2) => DefDatabase<HeadTypeDef>.GetNamed("Male_NarrowWide"),
+            (1, 0, 0) => DefDatabase<HeadTypeDef>.GetNamed("Female_AverageNormal"),
+            (1, 0, 1) => DefDatabase<HeadTypeDef>.GetNamed("Female_AveragePointy"),
+            (1, 0, 2) => DefDatabase<HeadTypeDef>.GetNamed("Female_AverageWide"),
+            (1, 1, 0) => DefDatabase<HeadTypeDef>.GetNamed("Female_NarrowNormal"),
+            (1, 1, 1) => DefDatabase<HeadTypeDef>.GetNamed("Female_NarrowPointy"),
+            (1, 1, 2) => DefDatabase<HeadTypeDef>.GetNamed("Female_NarrowWide"),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     public class ReplacementBodyPart {

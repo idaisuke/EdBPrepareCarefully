@@ -1,19 +1,19 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
-using Enumerable = System.Linq.Enumerable;
 
 namespace EdB.PrepareCarefully;
 
 public class PanelBackstory : PanelModule {
     public delegate void RandomizeBackstoriesHandler();
 
-    public delegate void UpdateBackstoryHandler(BackstorySlot slot, Backstory backstory);
+    public delegate void UpdateBackstoryHandler(BackstorySlot slot, BackstoryDef backstory);
 
-    protected List<Filter<Backstory>> activeFilters = new();
-    protected List<Filter<Backstory>> availableFilters = new();
+    protected List<Filter<BackstoryDef>> activeFilters = new();
+    protected List<Filter<BackstoryDef>> availableFilters = new();
     protected Field FieldAdulthood = new();
     protected Field FieldChildhood = new();
     protected ProviderBackstories providerBackstories = PrepareCarefully.Instance.Providers.Backstories;
@@ -185,15 +185,15 @@ public class PanelBackstory : PanelModule {
     }
 
     protected void ShowBackstoryDialog(CustomPawn customPawn, BackstorySlot slot) {
-        Filter<Backstory> filterToRemove = null;
         var originalBackstory = slot == BackstorySlot.Childhood ? customPawn.Childhood : customPawn.Adulthood;
         var selectedBackstory = originalBackstory;
+        Filter<BackstoryDef> filterToRemove = null;
         var filterListDirtyFlag = true;
         var fullOptionsList = slot == BackstorySlot.Childhood
             ? providerBackstories.AllChildhookBackstories
             : providerBackstories.AllAdulthookBackstories;
-        List<Backstory> filteredBackstories = new(fullOptionsList.Count);
-        Dialog_Options<Backstory> dialog = new(filteredBackstories) {
+        List<BackstoryDef> filteredBackstories = new(fullOptionsList.Count);
+        Dialog_Options<BackstoryDef> dialog = new(filteredBackstories) {
             NameFunc = backstory => {
                 return backstory.TitleCapFor(customPawn.Gender);
             },
@@ -224,7 +224,7 @@ public class PanelBackstory : PanelModule {
 
             if (filterListDirtyFlag) {
                 filteredBackstories.Clear();
-                filteredBackstories.AddRange(Enumerable.Where(fullOptionsList, p => {
+                filteredBackstories.AddRange(fullOptionsList.Where(p => {
                     foreach (var f in activeFilters) {
                         if (f.FilterFunction(p) == false) {
                             return false;
@@ -318,8 +318,8 @@ public class PanelBackstory : PanelModule {
     }
 
     protected void NextBackstory(CustomPawn pawn, BackstorySlot slot, int direction) {
-        Backstory backstory;
-        List<Backstory> backstories;
+        BackstoryDef backstory;
+        List<BackstoryDef> backstories;
         PopulateBackstoriesFromSlot(pawn, slot, out backstories, out backstory);
 
         var currentIndex = FindBackstoryIndex(pawn, slot);
@@ -335,14 +335,14 @@ public class PanelBackstory : PanelModule {
     }
 
     protected int FindBackstoryIndex(CustomPawn pawn, BackstorySlot slot) {
-        Backstory backstory;
-        List<Backstory> backstories;
+        BackstoryDef backstory;
+        List<BackstoryDef> backstories;
         PopulateBackstoriesFromSlot(pawn, slot, out backstories, out backstory);
         return backstories.IndexOf(backstory);
     }
 
-    protected void PopulateBackstoriesFromSlot(CustomPawn pawn, BackstorySlot slot, out List<Backstory> backstories,
-        out Backstory backstory) {
+    protected void PopulateBackstoriesFromSlot(CustomPawn pawn, BackstorySlot slot, out List<BackstoryDef> backstories,
+        out BackstoryDef backstory) {
         backstory = slot == BackstorySlot.Childhood ? pawn.Childhood : pawn.Adulthood;
         backstories = slot == BackstorySlot.Childhood
             ? providerBackstories.GetChildhoodBackstoriesForPawn(pawn)

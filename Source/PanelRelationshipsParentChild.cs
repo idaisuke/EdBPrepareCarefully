@@ -43,16 +43,6 @@ public class PanelRelationshipsParentChild : PanelBase {
     private readonly float SpacingGroup = 16;
     private readonly float SpacingPawn = 12;
 
-    private readonly HashSet<Backstory> visibleBackstories = new();
-
-    public PanelRelationshipsParentChild() {
-        // TODO: Pull this out and put it in a utility somewhere, i.e. ProviderBackstory.
-        foreach (Backstory backstory in BackstoryDatabase.allBackstories.Values) {
-            if (backstory.identifier.StartsWith("FactionLeader")) {
-                visibleBackstories.Add(backstory);
-            }
-        }
-    }
     private List<ParentChildGroup> groupsToRemove = new();
     private Rect RectScrollView;
     protected List<WidgetTable<CustomPawn>.RowGroup> rowGroups = new();

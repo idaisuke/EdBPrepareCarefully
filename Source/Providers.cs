@@ -1,11 +1,6 @@
 namespace EdB.PrepareCarefully;
 
 public class Providers {
-    public ProviderAlienRaces AlienRaces {
-        get;
-        set;
-    }
-
     public ProviderApparel Apparel {
         get;
         set;

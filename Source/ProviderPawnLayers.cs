@@ -13,8 +13,6 @@ public class ProviderPawnLayers {
         Label = "EdB.PC.Pawn.PawnLayer.Accessory".Translate()
     };
 
-    private Dictionary<AlienRace, List<PawnLayer>> alienPawnLayers = new();
-
     private readonly PawnLayer bottomClothingLayer = new() {
         Name = "BottomClothingLayer",
         Apparel = true,
@@ -72,12 +70,7 @@ public class ProviderPawnLayers {
     }
 
     public List<PawnLayer> InitializePawnLayers(ThingDef pawnDef, Gender gender) {
-        var race = PrepareCarefully.Instance.Providers.AlienRaces.GetAlienRace(pawnDef);
-        if (race == null) {
-            return InitializeDefaultPawnLayers(pawnDef, gender);
-        }
-
-        return InitializeAlienPawnLayers(pawnDef, gender, race);
+        return InitializeDefaultPawnLayers(pawnDef, gender);
     }
 
     private List<PawnLayer> InitializeDefaultPawnLayers(ThingDef pawnDef, Gender gender) {
@@ -99,57 +92,6 @@ public class ProviderPawnLayers {
         });
 
         return defaultLayers;
-    }
-
-    private List<PawnLayer> InitializeAlienPawnLayers(ThingDef pawnDef, Gender gender, AlienRace race) {
-        var layers = new List<PawnLayer>();
-        if (race.HasHair) {
-            layers.Add(InitializeHairLayer(pawnDef, gender));
-        }
-
-        if (race.HasBeards) {
-            layers.Add(InitializeBeardLayer(pawnDef, gender));
-        }
-
-        layers.Add(InitializeHeadLayer(pawnDef, gender));
-        layers.Add(InitializeBodyLayer(pawnDef, gender));
-
-        if (race.Addons != null) {
-            var optionsHair = PrepareCarefully.Instance.Providers.Hair.GetHairsForRace(pawnDef);
-            foreach (var addon in race.Addons) {
-                var layer = new PawnLayerAlienAddon();
-                layer.Name = addon.Name;
-                layer.Label = addon.Name;
-                if (addon.Skin) {
-                    layer.Skin = true;
-                }
-                else {
-                    layer.Hair = true;
-                    layer.ColorSelectorType = ColorSelectorType.RGB;
-                    layer.ColorSwatches = optionsHair.Colors;
-                }
-
-                layer.AlienAddon = addon;
-                layer.Options = InitializeAlienAddonOptions(race, addon);
-                if (layer.Options == null || layer.Options.Count == 1) {
-                    continue;
-                }
-
-                layers.Add(layer);
-            }
-        }
-
-        if (ModLister.IdeologyInstalled && race.HasTattoos) {
-            layers.AddRange(new[] {
-                InitializeFaceTattooLayer(pawnDef, gender), InitializeBodyTattooLayer(pawnDef, gender)
-            });
-        }
-
-        layers.AddRange(new[] {
-            pantsLayer, bottomClothingLayer, middleClothingLayer, topClothingLayer, hatLayer, accessoryLayer,
-            eyeCoveringLayer
-        });
-        return layers;
     }
 
     private PawnLayer InitializeHairLayer(ThingDef pawnDef, Gender gender) {
@@ -238,7 +180,7 @@ public class ProviderPawnLayers {
 
     private List<PawnLayerOption> InitializeHeadOptions(ThingDef pawnDef, Gender gender) {
         var options = new List<PawnLayerOption>();
-        foreach (var headType in PrepareCarefully.Instance.Providers.HeadTypes.GetHeadTypes(pawnDef, gender)) {
+        foreach (var headType in ProviderHeadTypes.GetHeadTypes(gender)) {
             var option = new PawnLayerOptionHead();
             option.HeadType = headType;
             options.Add(option);
@@ -262,22 +204,6 @@ public class ProviderPawnLayers {
         }
 
         return options;
-    }
-
-    private List<PawnLayerOption> InitializeAlienAddonOptions(AlienRace race, AlienRaceBodyAddon addon) {
-        if (addon.OptionCount == 0) {
-            return null;
-        }
-
-        var result = new List<PawnLayerOption>();
-        for (var i = 0; i < addon.OptionCount; i++) {
-            var option = new PawnLayerOptionAlienAddon();
-            option.Label = "EdB.PC.Pawn.PawnLayer.AlienAddonOption".Translate(i + 1);
-            option.Index = i;
-            result.Add(option);
-        }
-
-        return result;
     }
 
     public PawnLayer FindLayerForApparelLayer(ApparelLayerDef layer) {

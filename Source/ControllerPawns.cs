@@ -98,7 +98,7 @@ public class ControllerPawns {
     }
 
     // Backstory-related actions.
-    public void UpdateBackstory(BackstorySlot slot, Backstory backstory) {
+    public void UpdateBackstory(BackstorySlot slot, BackstoryDef backstory) {
         if (slot == BackstorySlot.Childhood) {
             state.CurrentPawn.Childhood = backstory;
         }
@@ -115,10 +115,6 @@ public class ControllerPawns {
             factionDef = Faction.OfPlayer.def;
         }
 
-        var providerAlienRaces = PrepareCarefully.Instance.Providers.AlienRaces;
-        var alienRace = providerAlienRaces.GetAlienRace(currentPawn.Pawn.def);
-        var adultStoryAge =
-            alienRace == null ? providerAlienRaces.DefaultMinAgeForAdulthood : alienRace.MinAgeForAdulthood;
         //Logger.Debug(String.Format("Adulthood age for {0} is {1}", state.CurrentPawn.Pawn.def.defName, adultStoryAge));
 
         var backstoryCategoryFiltersFor =
@@ -135,7 +131,7 @@ public class ControllerPawns {
                 //Logger.Debug(String.Format("Using fallback method to get solid random backstories for kindDef {0} \"{1}\" and faction {2} \"{3}\"",
                 //    kindDef.defName, kindDef.LabelCap, factionDef.defName, factionDef.LabelCap));
                 currentPawn.Childhood = providerBackstories.GetChildhoodBackstoriesForPawn(currentPawn).RandomElement();
-                if (currentPawn.BiologicalAge >= (int)adultStoryAge) {
+                if (currentPawn.Pawn.DevelopmentalStage.Adult()) {
                     currentPawn.Adulthood =
                         providerBackstories.GetAdulthoodBackstoriesForPawn(currentPawn).RandomElement();
                 }
@@ -145,7 +141,7 @@ public class ControllerPawns {
         }
 
         currentPawn.Childhood = pawnBio.childhood;
-        if (currentPawn.BiologicalAge >= (int)adultStoryAge) {
+        if (currentPawn.Pawn.DevelopmentalStage.Adult()) {
             currentPawn.Adulthood = pawnBio.adulthood;
         }
     }

@@ -11,11 +11,6 @@ public class ProviderHair {
     protected OptionsHair humanlikeHairs;
     protected OptionsHair noHair = new();
 
-    public ProviderAlienRaces AlienRaceProvider {
-        get;
-        set;
-    }
-
     protected OptionsHair HumanlikeHairs {
         get {
             if (humanlikeHairs == null) {
@@ -59,53 +54,7 @@ public class ProviderHair {
     }
 
     protected OptionsHair InitializeHairs(ThingDef raceDef) {
-        var alienRace = AlienRaceProvider.GetAlienRace(raceDef);
-        if (alienRace == null) {
-            return HumanlikeHairs;
-        }
-
-        if (!alienRace.HasHair) {
-            return noHair;
-        }
-
-        // If the alien race does not have a limited set of hairs, then we'll try to re-use the humanlike hair options.
-        if (alienRace.HairTags == null) {
-            // If the selection of hairs is the same and the alien race has no custom color generator, then
-            // we can just re-use the humanlike hair options.
-            if (alienRace.HairColors == null) {
-                return HumanlikeHairs;
-            }
-            // If there is a custom color generator, then we make a copy of the humanlike hair options--preserving
-            // the HairDef lists--but we replace the color list.
-
-            var humanHairs = HumanlikeHairs;
-            var humanHairsWithColors = new OptionsHair();
-            humanHairsWithColors.MaleHairs = humanHairs.MaleHairs;
-            humanHairsWithColors.FemaleHairs = humanHairs.FemaleHairs;
-            humanHairsWithColors.NoGenderHairs = humanHairs.NoGenderHairs;
-            humanHairsWithColors.Colors = alienRace.HairColors.ToList();
-            return humanHairsWithColors;
-        }
-
-        var result = new OptionsHair();
-        foreach (var hairDef in DefDatabase<HairDef>.AllDefs.Where(def => {
-                     foreach (var tag in def.styleTags) {
-                         if (alienRace.HairTags.Contains(tag)) {
-                             return true;
-                         }
-                     }
-
-                     return false;
-                 })) {
-            result.AddHair(hairDef);
-        }
-
-        if (alienRace.HairColors != null) {
-            result.Colors = alienRace.HairColors.ToList();
-        }
-
-        result.Sort();
-        return result;
+        return HumanlikeHairs;
     }
 
     protected OptionsHair InitializeHumanlikeHairs() {

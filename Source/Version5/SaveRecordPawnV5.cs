@@ -71,11 +71,11 @@ public class SaveRecordPawnV5 : IExposable {
         gender = pawn.Gender;
         adulthood = pawn.Adulthood?.identifier ?? pawn.LastSelectedAdulthoodBackstory?.identifier;
         childhood = pawn.Childhood?.identifier;
-        skinColor = pawn.Pawn.story.SkinColor;
-        melanin = pawn.Pawn.story.melanin;
+        skinColor = pawn.SkinColor;
+        melanin = pawn.MelaninLevel;
         hairDef = pawn.HairDef.defName;
-        hairColor = pawn.Pawn.story.hairColor;
-        headGraphicPath = pawn.HeadGraphicPath;
+        hairColor = pawn.Pawn.story.HairColor;
+        // headGraphicPath = pawn.HeadGraphicPath;
         bodyType = pawn.BodyType.defName;
         beard = pawn.Beard?.defName;
         faceTattoo = pawn.FaceTattoo?.defName;

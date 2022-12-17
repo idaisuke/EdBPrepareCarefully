@@ -403,13 +403,7 @@ namespace EdB.PrepareCarefully {
                 DrawColorSelectorForPawnLayer(customPawn, cursorY, selectedPawnLayer.ColorSwatches, true);
             }
             else if (selectedPawnLayer.ColorSelectorType == ColorSelectorType.Skin) {
-                AlienRace alienRace = customPawn.AlienRace;
-                if (alienRace == null || alienRace.UseMelaninLevels) {
-                    DrawHumanlikeColorSelector(customPawn, cursorY);
-                }
-                else if (alienRace.ChangeableColor) {
-                    DrawAlienPawnColorSelector(customPawn, cursorY, alienRace.PrimaryColors, true);
-                }
+                DrawHumanlikeColorSelector(customPawn, cursorY);
             }
 
             // Random button
@@ -654,7 +648,7 @@ namespace EdB.PrepareCarefully {
 
         protected void DrawAlienPawnColorSelector(CustomPawn customPawn, float cursorY, List<Color> colors,
             bool allowAnyColor) {
-            Color currentColor = customPawn.Pawn.story.SkinColor;
+            Color currentColor = customPawn.SkinColor;
             Color clickedColor = currentColor;
             Rect rect = new Rect(SwatchPosition.x, cursorY, SwatchSize.x, SwatchSize.y);
             if (colors != null) {
@@ -895,26 +889,6 @@ namespace EdB.PrepareCarefully {
             Text.Anchor = TextAnchor.UpperLeft;
         }
 
-        protected void SelectNextHead(CustomPawn customPawn, int direction) {
-            List<CustomHeadType> heads = PrepareCarefully.Instance.Providers.HeadTypes
-                .GetHeadTypes(customPawn.Pawn.def, customPawn.Gender).ToList();
-            int index = heads.IndexOf(customPawn.HeadType);
-            if (index == -1) {
-                return;
-            }
-
-            index += direction;
-            if (index < 0) {
-                index = heads.Count - 1;
-            }
-            else if (index >= heads.Count) {
-                index = 0;
-            }
-
-            customPawn.HeadType = heads[index];
-            this.pawnLayerLabel = GetHeadLabel(customPawn);
-        }
-
         protected void SelectNextBodyType(CustomPawn customPawn, int direction) {
             ProviderBodyTypes provider = PrepareCarefully.Instance.Providers.BodyTypes;
             List<BodyTypeDef> bodyTypes = provider.GetBodyTypesForPawn(customPawn);
@@ -992,7 +966,7 @@ namespace EdB.PrepareCarefully {
 
         protected string GetHeadLabel(CustomPawn pawn) {
             if (pawn.HeadType != null) {
-                return pawn.HeadType.Label;
+                return pawn.HeadType.defName;
             }
             else {
                 return "EdB.PC.Common.Default".Translate();

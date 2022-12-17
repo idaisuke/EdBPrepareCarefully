@@ -218,7 +218,6 @@ public class PrepareCarefully {
         // required providers so that they don't need to go back to this singleton to get the references.
         // If those dependencies get complicated, we might want to separate out the provider construction from
         // initialization.
-        Providers.AlienRaces = new ProviderAlienRaces();
         Providers.BodyTypes = new ProviderBodyTypes();
         Providers.HeadTypes = new ProviderHeadTypes();
         Providers.Hair = new ProviderHair();

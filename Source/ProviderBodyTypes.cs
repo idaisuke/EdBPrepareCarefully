@@ -27,11 +27,6 @@ public class ProviderBodyTypes {
         labels.Add("Oval", "EdB.PC.Pawn.BodyType.Oval".Translate());
     }
 
-    public ProviderAlienRaces AlienRaceProvider {
-        get;
-        set;
-    }
-
     public List<BodyTypeDef> GetBodyTypesForPawn(CustomPawn pawn) {
         return GetBodyTypesForPawn(pawn.Pawn);
     }
@@ -64,18 +59,7 @@ public class ProviderBodyTypes {
     }
 
     protected OptionsBodyType InitializeBodyTypes(ThingDef def) {
-        if (!ProviderAlienRaces.IsAlienRace(def)) {
-            return InitializeHumanlikeBodyTypes();
-        }
-
-        var result = InitializeAlienRaceBodyTypes(def);
-        if (result == null) {
-            Logger.Warning("Could not initialize body types for alien race, " + def.defName +
-                           ". Defaulting to humanlike body types.");
-            return InitializeHumanlikeBodyTypes();
-        }
-
-        return result;
+        return InitializeHumanlikeBodyTypes();
     }
 
     protected OptionsBodyType InitializeHumanlikeBodyTypes() {
@@ -108,60 +92,6 @@ public class ProviderBodyTypes {
 
             result.NoGenderBodyTypes.Add(d);
         }
-
-        return result;
-    }
-
-    protected OptionsBodyType InitializeAlienRaceBodyTypes(ThingDef def) {
-        var result = new OptionsBodyType();
-        var alienRace = AlienRaceProvider.GetAlienRace(def);
-        if (alienRace == null) {
-            return null;
-        }
-
-        if (alienRace.BodyTypes.Count > 0) {
-            var containsMale = alienRace.BodyTypes.Contains(BodyTypeDefOf.Male);
-            var containsFemale = alienRace.BodyTypes.Contains(BodyTypeDefOf.Female);
-            var containsBothMaleAndFemale = containsMale && containsFemale;
-            foreach (var type in alienRace.BodyTypes) {
-                if (type != BodyTypeDefOf.Male || !containsBothMaleAndFemale) {
-                    result.FemaleBodyTypes.Add(type);
-                }
-
-                if (type != BodyTypeDefOf.Female || !containsBothMaleAndFemale) {
-                    result.MaleBodyTypes.Add(type);
-                }
-
-                result.NoGenderBodyTypes.Add(type);
-            }
-        }
-
-        if (result.MaleBodyTypes.Count == 0 && result.FemaleBodyTypes.Count == 0) {
-            result = InitializeNonModdedDefaultHumanlikeBodyTypes();
-            //if (alienRace.GraphicsPathForBodyTypes != null && !defaultBodyTypesPaths.Contains(alienRace.GraphicsPathForBodyTypes)) {
-            //    result = InitializeHumanlikeBodyTypes();
-            //    result.MaleBodyTypes = result.MaleBodyTypes.Where(d => ValidateBodyTypeForAlienRace(alienRace, d)).ToList();
-            //    result.FemaleBodyTypes = result.FemaleBodyTypes.Where(d => ValidateBodyTypeForAlienRace(alienRace, d)).ToList();
-            //}
-            //else {
-            //    result = InitializeNonModdedDefaultHumanlikeBodyTypes();
-            //}
-        }
-
-        /*
-        // TODO: Is this right?
-        // Was this trying to guard against mod developers only defining male and not female body types?
-        if (result.MaleBodyTypes.Count == 0 && result.FemaleBodyTypes.Count > 0) {
-            result.MaleBodyTypes = result.FemaleBodyTypes;
-        }
-        else if (result.FemaleBodyTypes.Count == 0 && result.MaleBodyTypes.Count > 0) {
-            result.FemaleBodyTypes = result.MaleBodyTypes;
-        }
-
-        if (result.MaleBodyTypes.Count == 0 && result.FemaleBodyTypes.Count == 0) {
-            result = InitializeHumanlikeBodyTypes();
-        }
-        */
 
         return result;
     }

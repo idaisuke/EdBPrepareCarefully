@@ -3,7 +3,7 @@ using Verse;
 
 namespace EdB.PrepareCarefully;
 
-internal class FilterBackstorySkillAdjustment : Filter<Backstory> {
+internal class FilterBackstorySkillAdjustment : Filter<BackstoryDef> {
     public FilterBackstorySkillAdjustment(SkillDef skillDef, int bonusOrPenalty) {
         BonusOrPenalty = bonusOrPenalty;
         SkillDef = skillDef;
@@ -17,8 +17,8 @@ internal class FilterBackstorySkillAdjustment : Filter<Backstory> {
         }
 
         FilterFunction = backstory => {
-            if (SkillDef != null && backstory.skillGainsResolved.ContainsKey(SkillDef)) {
-                int value = backstory.skillGainsResolved[skillDef];
+            if (SkillDef != null && backstory.skillGains.ContainsKey(SkillDef)) {
+                var value = backstory.skillGains[skillDef];
                 if (bonusOrPenalty > 0) {
                     return value >= bonusOrPenalty;
                 }
@@ -39,7 +39,7 @@ internal class FilterBackstorySkillAdjustment : Filter<Backstory> {
         set;
     }
 
-    public override bool ConflictsWith(Filter<Backstory> filter) {
+    public override bool ConflictsWith(Filter<BackstoryDef> filter) {
         if (filter as FilterBackstorySkillAdjustment == null) {
             return false;
         }

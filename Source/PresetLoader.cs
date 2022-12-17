@@ -1,5 +1,4 @@
 using System;
-using RimWorld;
 using Verse;
 using PostLoadIniter = EdB.PrepareCarefully.Reflection.PostLoadIniter;
 
@@ -8,7 +7,6 @@ namespace EdB.PrepareCarefully;
 public class PresetLoader {
     public static bool LoadFromFile(PrepareCarefully loadout, string presetName) {
         var version = "";
-        var result = false;
         try {
             Scribe.loader.InitLoading(PresetFiles.FilePathForSavedPreset(presetName));
             Scribe_Values.Look<string>(ref version, "version", "unknown");
@@ -21,29 +19,11 @@ public class PresetLoader {
             Scribe.mode = LoadSaveMode.Inactive;
         }
 
-        if ("1".Equals(version)) {
-            Messages.Message("EdB.PC.Dialog.Preset.Error.PreAlpha13NotSupported".Translate(),
-                MessageTypeDefOf.ThreatBig);
-            return false;
-        }
-
-        if ("2".Equals(version)) {
-            Messages.Message("EdB.PC.Dialog.Preset.Error.PreAlpha13NotSupported".Translate(),
-                MessageTypeDefOf.ThreatBig);
-            return false;
-        }
-
-        if ("3".Equals(version)) {
-            result = new PresetLoaderVersion3().Load(loadout, presetName);
-        }
-        else if ("4".Equals(version) || "5".Equals(version)) {
-            result = new PresetLoaderV5().Load(loadout, presetName);
-        }
-        else {
-            throw new Exception("Invalid preset version");
-        }
-
-        return result;
+        return version switch {
+            "4" => new PresetLoaderV5().Load(loadout, presetName),
+            "5" => new PresetLoaderV5().Load(loadout, presetName),
+            _ => throw new Exception("Invalid preset version")
+        };
     }
 
     public static void ClearSaveablesAndCrossRefs() {

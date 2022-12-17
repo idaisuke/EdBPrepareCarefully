@@ -123,7 +123,7 @@ public class Randomizer {
         return GenerateKindOfPawn(pawn.kindDef);
     }
 
-    public static Backstory RandomAdulthood(CustomPawn customPawn) {
+    public static BackstoryDef RandomAdulthood(CustomPawn customPawn) {
         return PrepareCarefully.Instance.Providers.Backstories.GetAdulthoodBackstoriesForPawn(customPawn)
             .RandomElement();
     }

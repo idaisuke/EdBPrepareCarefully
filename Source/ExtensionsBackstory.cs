@@ -8,7 +8,7 @@ namespace EdB.PrepareCarefully;
 public static class ExtensionsBackstory {
     private static readonly HashSet<string> ProblemBackstories = new() { "pirate king" };
 
-    public static string CheckedDescriptionFor(this Backstory backstory, Pawn pawn) {
+    public static string CheckedDescriptionFor(this BackstoryDef backstory, Pawn pawn) {
         if (ProblemBackstories.Contains(backstory.untranslatedTitle)) {
             return PartialDescriptionFor(backstory);
         }
@@ -25,14 +25,14 @@ public static class ExtensionsBackstory {
     // EVERY RELEASE:
     // This is a copy of Backstory.FullDescriptionFor() that only includes the disabled work types and the skill adjustments.
     // Every release, we should evaluate that method to make sure that the logic has not changed.
-    public static string PartialDescriptionFor(this Backstory backstory) {
+    public static string PartialDescriptionFor(this BackstoryDef backstory) {
         var stringBuilder = new StringBuilder();
         var allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
         for (var i = 0; i < allDefsListForReading.Count; i++) {
             var skillDef = allDefsListForReading[i];
-            if (backstory.skillGainsResolved.ContainsKey(skillDef)) {
+            if (backstory.skillGains.ContainsKey(skillDef)) {
                 stringBuilder.AppendLine(skillDef.skillLabel.CapitalizeFirst() + ":   " +
-                                         backstory.skillGainsResolved[skillDef].ToString("+##;-##"));
+                                         backstory.skillGains[skillDef].ToString("+##;-##"));
             }
         }
 

@@ -3,7 +3,7 @@ using Verse;
 
 namespace EdB.PrepareCarefully;
 
-internal class FilterBackstoryMatchesFaction : Filter<Backstory> {
+internal class FilterBackstoryMatchesFaction : Filter<BackstoryDef> {
     public FilterBackstoryMatchesFaction() {
         LabelShort = LabelFull = "EdB.PC.Dialog.Backstory.Filter.MatchesFaction".Translate();
         FilterFunction = backstory => {

@@ -1,5 +1,4 @@
 using System;
-using RimWorld;
 using Verse;
 
 namespace EdB.PrepareCarefully;
@@ -19,24 +18,10 @@ public class ColonistLoader {
             Scribe.mode = LoadSaveMode.Inactive;
         }
 
-        if ("2".Equals(version)) {
-            Messages.Message("EdB.PC.Dialog.PawnPreset.Error.PreAlpha13NotSupported".Translate(),
-                MessageTypeDefOf.ThreatBig);
-            return null;
-        }
-
-        if ("3".Equals(version)) {
-            return new ColonistLoaderVersion3().Load(loadout, name);
-        }
-
-        if ("4".Equals(version)) {
-            return new PawnLoaderV5().Load(loadout, name);
-        }
-
-        if ("5".Equals(version)) {
-            return new PawnLoaderV5().Load(loadout, name);
-        }
-
-        throw new Exception("Invalid preset version");
+        return version switch {
+            "4" => new PawnLoaderV5().Load(loadout, name),
+            "5" => new PawnLoaderV5().Load(loadout, name),
+            _ => throw new Exception("Invalid preset version")
+        };
     }
 }

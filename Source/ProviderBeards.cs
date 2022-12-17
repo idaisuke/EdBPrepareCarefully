@@ -10,11 +10,6 @@ public class ProviderBeards {
     protected List<BeardDef> humanlikeBeards;
     protected List<BeardDef> noBeards = new();
 
-    public ProviderAlienRaces AlienRaceProvider {
-        get;
-        set;
-    }
-
     protected List<BeardDef> HumanlikeBeards {
         get {
             if (humanlikeBeards == null) {
@@ -58,15 +53,6 @@ public class ProviderBeards {
     }
 
     protected List<BeardDef> InitializeBeards(ThingDef raceDef) {
-        var alienRace = AlienRaceProvider.GetAlienRace(raceDef);
-        if (alienRace == null) {
-            return HumanlikeBeards;
-        }
-
-        if (!alienRace.HasBeards) {
-            return noBeards;
-        }
-
         return HumanlikeBeards;
     }
 
