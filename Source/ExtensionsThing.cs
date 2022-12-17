@@ -1,40 +1,45 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿using System.Reflection;
+using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.Sound;
 
-namespace EdB.PrepareCarefully {
-    public static class ExtensionsThing {
-        public static Color GetColor(this Thing thing) {
-            ThingWithComps thingWithComps = thing as ThingWithComps;
-            if (thingWithComps == null) {
-                return thing.DrawColor;
-            }
-            CompColorable comp = thingWithComps.GetComp<CompColorable>();
-            if (comp == null) {
-                return thing.DrawColor;
-            }
-            return comp.Color;
+namespace EdB.PrepareCarefully;
+
+public static class ExtensionsThing {
+    public static Color GetColor(this Thing thing) {
+        var thingWithComps = thing as ThingWithComps;
+        if (thingWithComps == null) {
+            return thing.DrawColor;
         }
-        public static QualityCategory GetQuality(this Thing thing) {
-            MinifiedThing minifiedThing = thing as MinifiedThing;
-            CompQuality compQuality = (minifiedThing == null) ? thing.TryGetComp<CompQuality>() : minifiedThing.InnerThing.TryGetComp<CompQuality>();
-            if (compQuality == null) {
-                return QualityCategory.Normal;
-            }
-            return compQuality.Quality;
+
+        var comp = thingWithComps.GetComp<CompColorable>();
+        if (comp == null) {
+            return thing.DrawColor;
         }
-        public static void SetQuality(this Thing thing, QualityCategory quality) {
-            MinifiedThing minifiedThing = thing as MinifiedThing;
-            CompQuality compQuality = (minifiedThing == null) ? thing.TryGetComp<CompQuality>() : minifiedThing.InnerThing.TryGetComp<CompQuality>();
-            if (compQuality != null) {
-                typeof(CompQuality).GetField("qualityInt", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(compQuality, quality);
-            }
+
+        return comp.Color;
+    }
+
+    public static QualityCategory GetQuality(this Thing thing) {
+        var minifiedThing = thing as MinifiedThing;
+        var compQuality = minifiedThing == null
+            ? thing.TryGetComp<CompQuality>()
+            : minifiedThing.InnerThing.TryGetComp<CompQuality>();
+        if (compQuality == null) {
+            return QualityCategory.Normal;
+        }
+
+        return compQuality.Quality;
+    }
+
+    public static void SetQuality(this Thing thing, QualityCategory quality) {
+        var minifiedThing = thing as MinifiedThing;
+        var compQuality = minifiedThing == null
+            ? thing.TryGetComp<CompQuality>()
+            : minifiedThing.InnerThing.TryGetComp<CompQuality>();
+        if (compQuality != null) {
+            typeof(CompQuality).GetField("qualityInt", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(compQuality, quality);
         }
     }
 }

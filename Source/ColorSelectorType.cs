@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿namespace EdB.PrepareCarefully;
 
-namespace EdB.PrepareCarefully {
-    public enum ColorSelectorType {
-        None,
-        Skin,
-        RGB,
-    }
+public enum ColorSelectorType {
+    None,
+    Skin,
+    RGB
 }

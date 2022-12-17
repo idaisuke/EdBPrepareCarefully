@@ -1,134 +1,85 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using RimWorld;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class State {
-        protected CustomPawn currentColonyPawn;
-        protected CustomPawn currentWorldPawn;
-        
-        protected List<string> errors = new List<string>();
-        protected List<string> messages = new List<string>();
-        private List<string> missingWorkTypes = null;
-        private PawnListMode pawnListMode = PawnListMode.ColonyPawnsMaximized;
+namespace EdB.PrepareCarefully;
 
-        public Page_PrepareCarefully Page {
-            get;
-            set;
-        }
-        
-        public List<CustomPawn> Pawns {
-            get {
-                return PrepareCarefully.Instance.Pawns;
-            }
-        }
+public class State {
+    protected CustomPawn currentColonyPawn;
+    protected CustomPawn currentWorldPawn;
 
-        public CustomPawn CurrentPawn {
-            get {
-                return pawnListMode == PawnListMode.ColonyPawnsMaximized ? currentColonyPawn : currentWorldPawn;
-            }
-            set {
-                if (pawnListMode == PawnListMode.ColonyPawnsMaximized) {
-                    currentColonyPawn = value;
-                }
-                else {
-                    currentWorldPawn = value;
-                }
-            }
-        }
+    protected List<string> errors = new();
+    protected List<string> messages = new();
 
-        public CustomPawn CurrentColonyPawn {
-            get {
-                return currentColonyPawn;
-            }
-            set {
+    public Page_PrepareCarefully Page {
+        get;
+        set;
+    }
+
+    public List<CustomPawn> Pawns => PrepareCarefully.Instance.Pawns;
+
+    public CustomPawn CurrentPawn {
+        get => PawnListMode == PawnListMode.ColonyPawnsMaximized ? currentColonyPawn : currentWorldPawn;
+        set {
+            if (PawnListMode == PawnListMode.ColonyPawnsMaximized) {
                 currentColonyPawn = value;
             }
-        }
-
-        public CustomPawn CurrentWorldPawn {
-            get {
-                return currentWorldPawn;
-            }
-            set {
+            else {
                 currentWorldPawn = value;
             }
         }
+    }
 
-        public List<CustomPawn> ColonyPawns {
-            get {
-                return PrepareCarefully.Instance.ColonyPawns;
-            }
-        }
+    public CustomPawn CurrentColonyPawn {
+        get => currentColonyPawn;
+        set => currentColonyPawn = value;
+    }
 
-        public FactionDef LastSelectedFactionDef {
-            get;
-            set;
-        }
+    public CustomPawn CurrentWorldPawn {
+        get => currentWorldPawn;
+        set => currentWorldPawn = value;
+    }
 
-        public PawnKindDef LastSelectedPawnKindDef {
-            get;
-            set;
-        }
+    public List<CustomPawn> ColonyPawns => PrepareCarefully.Instance.ColonyPawns;
 
-        public List<CustomPawn> WorldPawns {
-            get {
-                return PrepareCarefully.Instance.WorldPawns;
-            }
-        }
+    public FactionDef LastSelectedFactionDef {
+        get;
+        set;
+    }
 
-        public ITabView CurrentTab {
-            get;
-            set;
-        }
+    public PawnKindDef LastSelectedPawnKindDef {
+        get;
+        set;
+    }
 
-        public PawnListMode PawnListMode {
-            get {
-                return pawnListMode;
-            }
-            set {
-                pawnListMode = value;
-            }
-        }
+    public List<CustomPawn> WorldPawns => PrepareCarefully.Instance.WorldPawns;
 
-        public IEnumerable<string> Errors {
-            get {
-                return errors;
-            }
-        }
+    public ITabView CurrentTab {
+        get;
+        set;
+    }
 
-        public void AddError(string error) {
-            this.errors.Add(error);
-        }
+    public PawnListMode PawnListMode { get; set; } = PawnListMode.ColonyPawnsMaximized;
 
-        public List<string> MissingWorkTypes {
-            get {
-                return missingWorkTypes;
-            }
-            set {
-                missingWorkTypes = value;
-            }
-        }
+    public IEnumerable<string> Errors => errors;
 
-        public void ClearErrors() {
-            this.errors.Clear();
-        }
+    public List<string> MissingWorkTypes { get; set; }
 
-        public IEnumerable<string> Messages {
-            get {
-                return messages;
-            }
-        }
+    public IEnumerable<string> Messages => messages;
 
-        public void AddMessage(string message) {
-            this.messages.Add(message);
-        }
+    public void AddError(string error) {
+        errors.Add(error);
+    }
 
-        public void ClearMessages() {
-            this.messages.Clear();
-        }
+    public void ClearErrors() {
+        errors.Clear();
+    }
+
+    public void AddMessage(string message) {
+        messages.Add(message);
+    }
+
+    public void ClearMessages() {
+        messages.Clear();
     }
 }
-

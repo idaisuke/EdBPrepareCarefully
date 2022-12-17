@@ -1,58 +1,60 @@
 ﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    class FilterBackstorySkillAdjustment : Filter<Backstory> {
-        private int BonusOrPenalty {
-            get;
-            set;
+namespace EdB.PrepareCarefully;
+
+internal class FilterBackstorySkillAdjustment : Filter<Backstory> {
+    public FilterBackstorySkillAdjustment(SkillDef skillDef, int bonusOrPenalty) {
+        BonusOrPenalty = bonusOrPenalty;
+        SkillDef = skillDef;
+        if (BonusOrPenalty < 0) {
+            LabelShort = "EdB.PC.Dialog.Backstory.Filter.SkillPenalty".Translate(SkillDef.LabelCap, bonusOrPenalty);
+            LabelFull = "EdB.PC.Dialog.Backstory.Filter.SkillPenaltyFull".Translate(SkillDef.LabelCap, bonusOrPenalty);
         }
-        public SkillDef SkillDef {
-            get;
-            set;
+        else {
+            LabelShort = "EdB.PC.Dialog.Backstory.Filter.SkillBonus".Translate(SkillDef.LabelCap, bonusOrPenalty);
+            LabelFull = "EdB.PC.Dialog.Backstory.Filter.SkillBonusFull".Translate(SkillDef.LabelCap, bonusOrPenalty);
         }
-        public FilterBackstorySkillAdjustment(SkillDef skillDef, int bonusOrPenalty) {
-            this.BonusOrPenalty = bonusOrPenalty;
-            this.SkillDef = skillDef;
-            if (this.BonusOrPenalty < 0) {
-                this.LabelShort = "EdB.PC.Dialog.Backstory.Filter.SkillPenalty".Translate(this.SkillDef.LabelCap, bonusOrPenalty);
-                this.LabelFull = "EdB.PC.Dialog.Backstory.Filter.SkillPenaltyFull".Translate(this.SkillDef.LabelCap, bonusOrPenalty);
-            }
-            else {
-                this.LabelShort = "EdB.PC.Dialog.Backstory.Filter.SkillBonus".Translate(this.SkillDef.LabelCap, bonusOrPenalty);
-                this.LabelFull = "EdB.PC.Dialog.Backstory.Filter.SkillBonusFull".Translate(this.SkillDef.LabelCap, bonusOrPenalty);
-            }
-            this.FilterFunction = (Backstory backstory) => {
-                if (this.SkillDef != null && backstory.skillGainsResolved.ContainsKey(this.SkillDef)) {
-                    int value = backstory.skillGainsResolved[skillDef];
-                    if (bonusOrPenalty > 0) {
-                        return value >= bonusOrPenalty;
-                    }
-                    else {
-                        return value <= bonusOrPenalty;
-                    }
+
+        FilterFunction = backstory => {
+            if (SkillDef != null && backstory.skillGainsResolved.ContainsKey(SkillDef)) {
+                int value = backstory.skillGainsResolved[skillDef];
+                if (bonusOrPenalty > 0) {
+                    return value >= bonusOrPenalty;
                 }
-                return false;
-            };
-        }
-        public override bool ConflictsWith(Filter<Backstory> filter) {
-            if (filter as FilterBackstorySkillAdjustment == null) {
-                return false;
+
+                return value <= bonusOrPenalty;
             }
-            var f = (FilterBackstorySkillAdjustment)filter;
-            if (f.SkillDef == this.SkillDef) {
-                if (f.BonusOrPenalty > 0 && this.BonusOrPenalty > 0) {
-                    return true;
-                }
-                else if (f.BonusOrPenalty < 0 && f.BonusOrPenalty < 0) {
-                    return true;
-                }
-            }
+
+            return false;
+        };
+    }
+
+    private int BonusOrPenalty {
+        get;
+    }
+
+    public SkillDef SkillDef {
+        get;
+        set;
+    }
+
+    public override bool ConflictsWith(Filter<Backstory> filter) {
+        if (filter as FilterBackstorySkillAdjustment == null) {
             return false;
         }
+
+        var f = (FilterBackstorySkillAdjustment)filter;
+        if (f.SkillDef == SkillDef) {
+            if (f.BonusOrPenalty > 0 && BonusOrPenalty > 0) {
+                return true;
+            }
+
+            if (f.BonusOrPenalty < 0 && f.BonusOrPenalty < 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

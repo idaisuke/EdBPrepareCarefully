@@ -1,11 +1,34 @@
-﻿using RimWorld;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+
 namespace EdB.PrepareCarefully {
     public class DialogSelectPawn : Window {
+        public string CancelButtonLabel = "EdB.PC.Common.Cancel";
+
+        public string ConfirmButtonLabel = "EdB.PC.Common.Next";
+        protected bool confirmed = false;
+
+        public Func<string> ConfirmValidation = () => {
+            return null;
+        };
+
+        protected string headerLabel;
+        protected bool resizeDirtyFlag = true;
+
+        protected WidgetTable<CustomPawn> table = new WidgetTable<CustomPawn>();
+
+        public DialogSelectPawn() {
+            this.closeOnCancel = true;
+            this.doCloseX = true;
+            this.absorbInputAroundWindow = true;
+            this.forcePause = true;
+            Resize();
+        }
+
         public Vector2 ContentMargin { get; protected set; }
         public Vector2 WindowSize { get; protected set; }
         public Vector2 ButtonSize { get; protected set; }
@@ -20,17 +43,6 @@ namespace EdB.PrepareCarefully {
         public Rect CancelButtonRect { get; protected set; }
         public Rect ConfirmButtonRect { get; protected set; }
         public Rect SingleButtonRect { get; protected set; }
-        protected string headerLabel;
-        protected bool resizeDirtyFlag = true;
-        protected bool confirmed = false;
-
-        public DialogSelectPawn() {
-            this.closeOnCancel = true;
-            this.doCloseX = true;
-            this.absorbInputAroundWindow = true;
-            this.forcePause = true;
-            Resize();
-        }
 
         public CustomPawn SelectedPawn {
             get;
@@ -46,26 +58,32 @@ namespace EdB.PrepareCarefully {
                 MarkResizeFlagDirty();
             }
         }
-        public Func<string> ConfirmValidation = () => {
-            return null;
-        };
+
         public Action CloseAction {
             get;
             set;
         }
+
         public Action<CustomPawn> SelectAction {
             get;
             set;
         }
+
         public HashSet<CustomPawn> DisabledPawns {
             get;
             set;
         }
 
-        protected WidgetTable<CustomPawn> table = new WidgetTable<CustomPawn>();
+        public IEnumerable<CustomPawn> Pawns {
+            get;
+            set;
+        }
 
-        public string ConfirmButtonLabel = "EdB.PC.Common.Next";
-        public string CancelButtonLabel = "EdB.PC.Common.Cancel";
+        public override Vector2 InitialSize {
+            get {
+                return new Vector2(WindowSize.x, WindowSize.y);
+            }
+        }
 
         protected void MarkResizeFlagDirty() {
             resizeDirtyFlag = true;
@@ -77,7 +95,7 @@ namespace EdB.PrepareCarefully {
             if (HeaderLabel != null) {
                 headerSize = HeaderHeight;
             }
-            
+
             HeaderHeight = 32;
             FooterHeight = 40f;
             WindowPadding = 18;
@@ -133,7 +151,9 @@ namespace EdB.PrepareCarefully {
                 DrawAction = (CustomPawn pawn, Rect rect, WidgetTable<CustomPawn>.Metadata metadata) => {
                     GUI.color = Color.white;
                     var texture = pawn.GetPortrait(new Vector2(portraitSize.x, portraitSize.y + portraitOverflow * 2));
-                    GUI.DrawTexture(new Rect(rect.position.x, rect.position.y - portraitOverflow, portraitSize.x, portraitSize.y + portraitOverflow * 2), texture as Texture);
+                    GUI.DrawTexture(
+                        new Rect(rect.position.x, rect.position.y - portraitOverflow, portraitSize.x,
+                            portraitSize.y + portraitOverflow * 2), texture as Texture);
                 },
                 Width = portraitSize.x
             });
@@ -146,13 +166,17 @@ namespace EdB.PrepareCarefully {
                     Text.Font = GameFont.Small;
                     Widgets.Label(new Rect(rect.x, rect.y + nameOffset, rect.width, nameSize.y), pawn.FullName);
                     Text.Anchor = TextAnchor.UpperLeft;
-                    string description = pawn.IsAdult ? pawn.Adulthood.TitleShortFor(pawn.Gender) : pawn.Childhood.TitleShortFor(pawn.Gender);
+                    string description = pawn.IsAdult
+                        ? pawn.Adulthood.TitleShortFor(pawn.Gender)
+                        : pawn.Childhood.TitleShortFor(pawn.Gender);
                     description += ", " + pawn.Gender.GetLabel() + ", age " + pawn.BiologicalAge;
                     if (pawn.BiologicalAge != pawn.ChronologicalAge) {
                         description += " (" + pawn.ChronologicalAge + ")";
                     }
+
                     Text.Font = GameFont.Tiny;
-                    Widgets.Label(new Rect(rect.x, rect.y + nameSize.y + descriptionOffset, rect.width, nameSize.y), description);
+                    Widgets.Label(new Rect(rect.x, rect.y + nameSize.y + descriptionOffset, rect.width, nameSize.y),
+                        description);
                     Text.Font = GameFont.Small;
                     Text.Anchor = TextAnchor.UpperLeft;
                 }
@@ -184,20 +208,11 @@ namespace EdB.PrepareCarefully {
             }
         }
 
-        public IEnumerable<CustomPawn> Pawns {
-            get; set;
-        }
-
-        public override Vector2 InitialSize {
-            get {
-                return new Vector2(WindowSize.x, WindowSize.y);
-            }
-        }
-
         public override void DoWindowContents(Rect inRect) {
             if (resizeDirtyFlag) {
                 Resize();
             }
+
             GUI.color = Color.white;
             Text.Font = GameFont.Medium;
             if (HeaderLabel != null) {
@@ -222,8 +237,10 @@ namespace EdB.PrepareCarefully {
                     if (Widgets.ButtonText(CancelButtonRect, CancelButtonLabel.Translate(), true, true, true)) {
                         this.Close(true);
                     }
+
                     buttonRect = ConfirmButtonRect;
                 }
+
                 if (Widgets.ButtonText(buttonRect, ConfirmButtonLabel.Translate(), true, true, true)) {
                     string validationMessage = ConfirmValidation();
                     if (validationMessage != null) {
@@ -258,4 +275,3 @@ namespace EdB.PrepareCarefully {
         }
     }
 }
-

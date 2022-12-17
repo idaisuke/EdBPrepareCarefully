@@ -1,17 +1,12 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Verse;
+﻿using Verse;
 
-namespace EdB.PrepareCarefully {
-    class FilterBackstoryNoDisabledWorkTypes : Filter<Backstory> {
-        public FilterBackstoryNoDisabledWorkTypes() {
-            this.LabelShort = this.LabelFull = "EdB.PC.Dialog.Backstory.Filter.NoDisabledWorkTypes".Translate();
-            this.FilterFunction = (Backstory backstory) => {
-                return (backstory.DisabledWorkTypes.FirstOrDefault() == null);
-            };
-        }
+namespace EdB.PrepareCarefully;
+
+internal class FilterBackstoryNoDisabledWorkTypes : Filter<Backstory> {
+    public FilterBackstoryNoDisabledWorkTypes() {
+        LabelShort = LabelFull = "EdB.PC.Dialog.Backstory.Filter.NoDisabledWorkTypes".Translate();
+        FilterFunction = backstory => {
+            return backstory.DisabledWorkTypes.FirstOrDefault() == null;
+        };
     }
 }

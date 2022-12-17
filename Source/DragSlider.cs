@@ -1,177 +1,183 @@
-﻿using RimWorld;
-using System;
+﻿using System;
 using System.Reflection;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace EdB.PrepareCarefully {
-    public delegate void DragSliderValueUpdateCallback(int value);
+namespace EdB.PrepareCarefully;
 
-    public class DragSlider {
-        private DragSliderCallback dragStartCallback;
-        private DragSliderCallback dragUpdateCallback;
-        private DragSliderCallback dragCompletedCallback;
-        protected static FieldInfo draggingField;
+public delegate void DragSliderValueUpdateCallback(int value);
 
-        public DragSliderValueUpdateCallback valueUpdateCallback = null;
+public class DragSlider {
+    private const int DragTimeGrowMinimumOffset = 300;
+    protected static FieldInfo draggingField;
 
-        private float lastDragRealTime = -10000;
+    private static readonly SoundDef DragStartSound = SoundDef.Named("TradeSlider_DragStart");
 
-        private static readonly SoundDef DragStartSound = SoundDef.Named("TradeSlider_DragStart");
+    private static readonly SoundDef DragAmountChangedSound = SoundDef.Named("Drag_TradeSlider");
 
-        private static readonly SoundDef DragAmountChangedSound = SoundDef.Named("Drag_TradeSlider");
+    private static readonly SoundDef DragEndSound = SoundDef.Named("TradeSlider_DragEnd");
+    private readonly DragSliderCallback dragCompletedCallback;
+    private readonly DragSliderCallback dragStartCallback;
+    private readonly DragSliderCallback dragUpdateCallback;
 
-        private static readonly SoundDef DragEndSound = SoundDef.Named("TradeSlider_DragEnd");
+    public int dragBaseAmount;
 
-        private const int DragTimeGrowMinimumOffset = 300;
+    public bool dragLimitWarningGiven;
 
-        public bool dragLimitWarningGiven = false;
+    private float lastDragRealTime = -10000;
 
-        public int dragBaseAmount;
+    public float lastUpdateTime;
+    public float maxDelta = 400;
+    public int maxValue = Int32.MaxValue;
+    public int minValue = 0;
+    public int multiplier = 10;
+    public float scale = 15;
 
-        public float lastUpdateTime = 0;
+    public float stretch = 0.4f;
 
-        public float stretch = 0.4f;
-        public float scale = 15;
-        public int multiplier = 10;
-        public float maxDelta = 400;
-        public int maxValue = Int32.MaxValue;
-        public int minValue = 0;
+    protected int value;
 
-        protected int value;
+    public DragSliderValueUpdateCallback valueUpdateCallback;
 
-        public DragSlider() {
-            dragStartCallback = new DragSliderCallback(this.DraggingStart);
-            dragUpdateCallback = new DragSliderCallback(this.DraggingUpdate);
-            dragCompletedCallback = new DragSliderCallback(this.DraggingCompleted);
-        }
+    public DragSlider() {
+        dragStartCallback = DraggingStart;
+        dragUpdateCallback = DraggingUpdate;
+        dragCompletedCallback = DraggingCompleted;
+    }
 
-        public DragSlider(float stretch, float scale, float maxDelta) : this() {
-            this.stretch = stretch;
-            this.scale = scale;
-            this.maxDelta = maxDelta;
-        }
+    public DragSlider(float stretch, float scale, float maxDelta) : this() {
+        this.stretch = stretch;
+        this.scale = scale;
+        this.maxDelta = maxDelta;
+    }
 
-        public void Reset() {
-            lastUpdateTime = 0;
-        }
+    public void Reset() {
+        lastUpdateTime = 0;
+    }
 
-        protected void Update() {
-            lastUpdateTime = lastUpdateTime += Time.deltaTime;
-        }
+    protected void Update() {
+        lastUpdateTime = lastUpdateTime += Time.deltaTime;
+    }
 
-        public void DraggingStart(float mouseOffX, float rateFactor) {
-            SoundStarter.PlayOneShot(DragStartSound, SoundInfo.OnCamera(MaintenanceType.None));
-        }
+    public void DraggingStart(float mouseOffX, float rateFactor) {
+        DragStartSound.PlayOneShot(SoundInfo.OnCamera());
+    }
 
-        public void DraggingCompleted(float mouseOffX, float rateFactor) {
-            SoundStarter.PlayOneShot(DragEndSound, SoundInfo.OnCamera(MaintenanceType.None));
-            valueUpdateCallback = null;
-        }
+    public void DraggingCompleted(float mouseOffX, float rateFactor) {
+        DragEndSound.PlayOneShot(SoundInfo.OnCamera());
+        valueUpdateCallback = null;
+    }
 
-        public void DraggingUpdate(float mouseOffX, float rateFactor) {
-            Update();
+    public void DraggingUpdate(float mouseOffX, float rateFactor) {
+        Update();
 
-            int amount = 0;
-            int direction = 1;
+        var amount = 0;
+        var direction = 1;
 
-            if (mouseOffX != 0) {
-                float delta = Math.Abs(mouseOffX);
-                if (delta > maxDelta) {
-                    delta = maxDelta;
-                }
-                delta = delta * stretch;
-                delta = scale / (delta * delta);
-                if (lastUpdateTime > delta) {
-                    amount = 0;
-                    while (lastUpdateTime > delta) {
-                        lastUpdateTime -= delta;
-                        amount++;
-                    }
-                }
+        if (mouseOffX != 0) {
+            var delta = Math.Abs(mouseOffX);
+            if (delta > maxDelta) {
+                delta = maxDelta;
             }
 
-            if (mouseOffX < 0) {
-                direction = -1;
+            delta = delta * stretch;
+            delta = scale / (delta * delta);
+            if (lastUpdateTime > delta) {
+                amount = 0;
+                while (lastUpdateTime > delta) {
+                    lastUpdateTime -= delta;
+                    amount++;
+                }
+            }
+        }
+
+        if (mouseOffX < 0) {
+            direction = -1;
+        }
+
+        AcceptanceReport acceptanceReport = null;
+        if (amount != 0) {
+            if (Event.current.shift) {
+                amount = amount * multiplier;
             }
 
-            AcceptanceReport acceptanceReport = null;
-            if (amount != 0) {
-                if (Event.current.shift) {
-                    amount = amount * multiplier;
-                }
-                if (direction > 0) {
-                    if (value < maxValue) {
-                        if (maxValue - value < amount) {
-                            value = maxValue;
-                        }
-                        else {
-                            value += amount;
-                        }
-                        acceptanceReport = true;
+            if (direction > 0) {
+                if (value < maxValue) {
+                    if (maxValue - value < amount) {
+                        value = maxValue;
                     }
                     else {
-                        acceptanceReport = false;
+                        value += amount;
                     }
+
+                    acceptanceReport = true;
                 }
                 else {
-                    if (value > minValue) {
-                        if (minValue + amount > value) {
-                            value = minValue;
-                        }
-                        else {
-                            value -= amount;
-                        }
-                        acceptanceReport = true;
+                    acceptanceReport = false;
+                }
+            }
+            else {
+                if (value > minValue) {
+                    if (minValue + amount > value) {
+                        value = minValue;
                     }
                     else {
-                        acceptanceReport = false;
+                        value -= amount;
                     }
+
+                    acceptanceReport = true;
                 }
-                if (acceptanceReport.Accepted) {
-                    SoundStarter.PlayOneShot(DragAmountChangedSound, SoundInfo.OnCamera(MaintenanceType.None));
-                   lastDragRealTime = Time.realtimeSinceStartup;
+                else {
+                    acceptanceReport = false;
                 }
             }
-            if (valueUpdateCallback != null) {
-                valueUpdateCallback(value);
+
+            if (acceptanceReport.Accepted) {
+                DragAmountChangedSound.PlayOneShot(SoundInfo.OnCamera());
+                lastDragRealTime = Time.realtimeSinceStartup;
             }
         }
 
-        public void OnGUI(Rect rect, int value, DragSliderValueUpdateCallback valueUpdateCallback) {
-            float centerX = rect.x + rect.width / 2;
-            float y = rect.y + rect.height / 2;
-            float height = rect.height;
-            Rect slRect = new Rect(rect);
+        if (valueUpdateCallback != null) {
+            valueUpdateCallback(value);
+        }
+    }
 
-            if (DragSliderManager.DragSlider(slRect, 1, dragStartCallback, dragUpdateCallback, dragCompletedCallback)) {
-                Reset();
-                this.value = value;
-                dragBaseAmount = value;
-                dragLimitWarningGiven = false;
-                this.valueUpdateCallback = valueUpdateCallback;
-            }
+    public void OnGUI(Rect rect, int value, DragSliderValueUpdateCallback valueUpdateCallback) {
+        var centerX = rect.x + (rect.width / 2);
+        var y = rect.y + (rect.height / 2);
+        var height = rect.height;
+        var slRect = new Rect(rect);
 
-            string label = value.ToString();
-            GUI.color = Color.white;
-            Text.Anchor = TextAnchor.MiddleCenter;
-            rect.y += 1;
-            Widgets.Label(rect, label);
-            rect.y -= 1;
-            Text.Anchor = TextAnchor.UpperLeft;
-            GUI.color = Color.white;
+        if (DragSliderManager.DragSlider(slRect, 1, dragStartCallback, dragUpdateCallback, dragCompletedCallback)) {
+            Reset();
+            this.value = value;
+            dragBaseAmount = value;
+            dragLimitWarningGiven = false;
+            this.valueUpdateCallback = valueUpdateCallback;
         }
 
-        public static bool IsDragging() {
-            if (draggingField == null) {
-                draggingField = typeof(DragSliderManager).GetField("dragging", BindingFlags.Static | BindingFlags.NonPublic);
-            }
-            return (bool)draggingField.GetValue(null);
+        var label = value.ToString();
+        GUI.color = Color.white;
+        Text.Anchor = TextAnchor.MiddleCenter;
+        rect.y += 1;
+        Widgets.Label(rect, label);
+        rect.y -= 1;
+        Text.Anchor = TextAnchor.UpperLeft;
+        GUI.color = Color.white;
+    }
+
+    public static bool IsDragging() {
+        if (draggingField == null) {
+            draggingField =
+                typeof(DragSliderManager).GetField("dragging", BindingFlags.Static | BindingFlags.NonPublic);
         }
 
-        public void ForceStop() {
-            DragSliderManager.ForceStop();
-        }
+        return (bool)draggingField.GetValue(null);
+    }
+
+    public void ForceStop() {
+        DragSliderManager.ForceStop();
     }
 }

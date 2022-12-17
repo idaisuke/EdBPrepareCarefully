@@ -1,28 +1,20 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RimWorld;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class SaveRecordIdeoV5 : IExposable {
-        public string name;
-        public float certainty;
-        public bool sameAsColony;
-        public string culture;
-        public List<string> memes;
+namespace EdB.PrepareCarefully;
 
-        public SaveRecordIdeoV5() {
-        }
+public class SaveRecordIdeoV5 : IExposable {
+    public float certainty;
+    public string culture;
+    public List<string> memes;
+    public string name;
+    public bool sameAsColony;
 
-        public void ExposeData() {
-            Scribe_Values.Look<string>(ref this.name, "name", null, false);
-            Scribe_Values.Look<float>(ref this.certainty, "certainty", 0.85f, false);
-            Scribe_Values.Look<bool>(ref this.sameAsColony, "sameAsColony", true, false);
-            Scribe_Values.Look<string>(ref this.culture, "culture");
-            Scribe_Collections.Look<string>(ref this.memes, "memes");
-        }
+    public void ExposeData() {
+        Scribe_Values.Look<string>(ref name, "name");
+        Scribe_Values.Look(ref certainty, "certainty", 0.85f);
+        Scribe_Values.Look(ref sameAsColony, "sameAsColony", true);
+        Scribe_Values.Look<string>(ref culture, "culture");
+        Scribe_Collections.Look(ref memes, "memes");
     }
 }

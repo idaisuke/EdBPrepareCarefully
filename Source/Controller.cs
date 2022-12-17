@@ -1,12 +1,10 @@
-using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
+using RimWorld;
 using UnityEngine;
 using Verse;
+
 namespace EdB.PrepareCarefully {
     public class Controller {
         private State state;
@@ -14,27 +12,30 @@ namespace EdB.PrepareCarefully {
         private ControllerEquipment subcontrollerEquipment;
         private ControllerRelationships subcontrollerRelationships;
 
-        public ControllerPawns SubcontrollerCharacters {
-            get {
-                return subcontrollerCharacters;
-            }
-        }
-        public ControllerEquipment SubcontrollerEquipment {
-            get {
-                return subcontrollerEquipment;
-            }
-        }
-        public ControllerRelationships SubcontrollerRelationships {
-            get {
-                return subcontrollerRelationships;
-            }
-        }
         public Controller(State state) {
             this.state = state;
             subcontrollerCharacters = new ControllerPawns(state);
             subcontrollerEquipment = new ControllerEquipment(state);
             subcontrollerRelationships = new ControllerRelationships(state);
             subcontrollerCharacters.CheckPawnCapabilities();
+        }
+
+        public ControllerPawns SubcontrollerCharacters {
+            get {
+                return subcontrollerCharacters;
+            }
+        }
+
+        public ControllerEquipment SubcontrollerEquipment {
+            get {
+                return subcontrollerEquipment;
+            }
+        }
+
+        public ControllerRelationships SubcontrollerRelationships {
+            get {
+                return subcontrollerRelationships;
+            }
         }
 
         public bool CanDoNext() {
@@ -45,17 +46,21 @@ namespace EdB.PrepareCarefully {
                     return false;
                 }
             }
+
             int pawnCount = PrepareCarefully.Instance.Pawns.Count;
             if (pawnCount < config.minColonists) {
                 if (config.minColonists == 1) {
-                    Messages.Message("EdB.PC.Error.NotEnoughColonists1".Translate(config.minColonists), MessageTypeDefOf.RejectInput, false);
+                    Messages.Message("EdB.PC.Error.NotEnoughColonists1".Translate(config.minColonists),
+                        MessageTypeDefOf.RejectInput, false);
                     return false;
                 }
                 else {
-                    Messages.Message("EdB.PC.Error.NotEnoughColonists".Translate(config.minColonists), MessageTypeDefOf.RejectInput, false);
+                    Messages.Message("EdB.PC.Error.NotEnoughColonists".Translate(config.minColonists),
+                        MessageTypeDefOf.RejectInput, false);
                     return false;
                 }
             }
+
             // TODO: This is no good as it is.  In vanilla, if the player only has a nickname, it copies that nickname into the
             // first and last names.  We need to do something similar and adjust this validation accordingly.
             //foreach (CustomPawn current in PrepareCarefully.Instance.Pawns) {
@@ -84,12 +89,14 @@ namespace EdB.PrepareCarefully {
                 Logger.Warning("Trying to load a preset without a name");
                 return;
             }
+
             bool result = PresetLoader.LoadFromFile(PrepareCarefully.Instance, name);
             if (result) {
                 state.AddMessage("EdB.PC.Dialog.Preset.Loaded".Translate(name));
                 state.CurrentColonyPawn = state.ColonyPawns.FirstOrDefault();
                 state.CurrentWorldPawn = state.WorldPawns.FirstOrDefault();
             }
+
             subcontrollerCharacters.CheckPawnCapabilities();
         }
 
@@ -99,10 +106,11 @@ namespace EdB.PrepareCarefully {
                 Logger.Warning("Trying to save a preset without a name");
                 return;
             }
+
             PresetSaver.SaveToFile(PrepareCarefully.Instance, PrepareCarefully.Instance.Filename);
             state.AddMessage("SavedAs".Translate(PrepareCarefully.Instance.Filename));
         }
-        
+
         public void PrepareGame() {
             PrepareRelatedPawns();
             PrepareColonists();
@@ -130,9 +138,7 @@ namespace EdB.PrepareCarefully {
 
         protected Scenario CopyScenarioWithoutParts(Scenario source) {
             Scenario result = new Scenario() {
-                name = source.name,
-                summary = source.summary,
-                description = source.description,
+                name = source.name, summary = source.summary, description = source.description
             };
             ScenPart_PlayerFaction faction = source.GetPrivateField<ScenPart_PlayerFaction>("playerFaction");
             result.SetPrivateField("playerFaction", faction);
@@ -147,10 +153,12 @@ namespace EdB.PrepareCarefully {
                     if (customPawn.Pawn.workSettings == null) {
                         customPawn.Pawn.workSettings = new Pawn_WorkSettings(customPawn.Pawn);
                     }
+
                     customPawn.Pawn.workSettings.EnableAndInitialize();
                     colonists.Add(customPawn.Pawn);
                 }
             }
+
             Find.GameInitData.startingPawnCount = colonists.Count;
             Find.GameInitData.startingAndOptionalPawns = colonists;
         }
@@ -165,7 +173,8 @@ namespace EdB.PrepareCarefully {
 
         protected void PrepareRelatedPawns() {
             // Get all of the related pawns.
-            List<CustomPawn> relatedPawns = new RelationshipBuilder(PrepareCarefully.Instance.RelationshipManager.Relationships.ToList(),
+            List<CustomPawn> relatedPawns = new RelationshipBuilder(
+                PrepareCarefully.Instance.RelationshipManager.Relationships.ToList(),
                 PrepareCarefully.Instance.RelationshipManager.ParentChildGroups).Build();
 
             // Add related pawns who are not already in the world to the world
@@ -198,6 +207,7 @@ namespace EdB.PrepareCarefully {
                 if (!pawn.Pawn.Dead) {
                     pawn.Pawn.Kill(null, null);
                 }
+
                 return;
             }
 
@@ -216,6 +226,7 @@ namespace EdB.PrepareCarefully {
                     if (pawn.Faction.Leader) {
                         MakePawnIntoFactionLeader(pawn);
                     }
+
                     try {
                         pawn.Pawn.SetFaction(pawn.Faction.Faction, null);
                     }
@@ -226,13 +237,16 @@ namespace EdB.PrepareCarefully {
                 // If they are assigned to a random faction of a specific def, choose the random faction and assign it.
                 else {
                     try {
-                        List<Faction> availableFactions = PrepareCarefully.Instance.Providers.Factions.GetFactions(pawn.Faction.Def);
+                        List<Faction> availableFactions =
+                            PrepareCarefully.Instance.Providers.Factions.GetFactions(pawn.Faction.Def);
                         if (availableFactions != null && availableFactions.Count > 0) {
                             Faction faction = availableFactions.RandomElement();
                             pawn.Pawn.SetFaction(faction, null);
                         }
                         else {
-                            Logger.Warning(String.Format("Couldn't assign pawn {0} to specified faction.  Faction not available in world", pawn.LabelShort));
+                            Logger.Warning(String.Format(
+                                "Couldn't assign pawn {0} to specified faction.  Faction not available in world",
+                                pawn.LabelShort));
                             pawn.Pawn.SetFactionDirect(null);
                         }
                     }
@@ -245,10 +259,12 @@ namespace EdB.PrepareCarefully {
             else {
                 pawn.Pawn.SetFactionDirect(null);
             }
-            
+
             // Don't add pawns to the world if they have already been added.
-            if (Find.World.worldPawns.Contains(pawn.Pawn) || Find.GameInitData.startingAndOptionalPawns.Contains(pawn.Pawn)) {
-                Logger.Message("Didn't add pawn " + pawn.ShortName + " to the world because they've already been added");
+            if (Find.World.worldPawns.Contains(pawn.Pawn) ||
+                Find.GameInitData.startingAndOptionalPawns.Contains(pawn.Pawn)) {
+                Logger.Message("Didn't add pawn " + pawn.ShortName +
+                               " to the world because they've already been added");
                 return;
             }
             else {
@@ -259,12 +275,14 @@ namespace EdB.PrepareCarefully {
         protected void MakePawnIntoFactionLeader(CustomPawn pawn) {
             FactionDef factionDef = pawn.Faction.Def;
             List<PawnKindDef> source = new List<PawnKindDef>();
-            foreach (PawnGroupMaker pawnGroupMaker in factionDef.pawnGroupMakers.Where<PawnGroupMaker>((Func<PawnGroupMaker, bool>)(x => x.kindDef == PawnGroupKindDefOf.Combat))) {
+            foreach (PawnGroupMaker pawnGroupMaker in factionDef.pawnGroupMakers.Where<PawnGroupMaker>(
+                         (Func<PawnGroupMaker, bool>)(x => x.kindDef == PawnGroupKindDefOf.Combat))) {
                 foreach (PawnGenOption option in pawnGroupMaker.options) {
                     if (option.kind.factionLeader)
                         source.Add(option.kind);
                 }
             }
+
             PawnKindDef result;
             if (source.TryRandomElement<PawnKindDef>(out result)) {
                 Pawn randomPawn = PawnGenerator.GeneratePawn(result, pawn.Faction.Faction);
@@ -275,19 +293,23 @@ namespace EdB.PrepareCarefully {
                 foreach (var thing in randomPawn.inventory.innerContainer) {
                     inventory.Add(thing);
                 }
+
                 foreach (var thing in inventory) {
                     randomPawn.inventory.innerContainer.Remove(thing);
                     pawn.Pawn.inventory.innerContainer.TryAdd(thing, true);
                 }
+
                 List<ThingWithComps> equipment = new List<ThingWithComps>();
                 foreach (var thing in randomPawn.equipment.AllEquipmentListForReading) {
                     equipment.Add(thing);
                 }
+
                 foreach (var thing in equipment) {
                     randomPawn.equipment.Remove(thing);
                     pawn.Pawn.equipment.AddEquipment(thing);
                 }
             }
+
             // Make the pawn into the faction leader.
             pawn.Faction.Faction.leader = pawn.Pawn;
         }
@@ -312,9 +334,12 @@ namespace EdB.PrepareCarefully {
 
             // Replace the pawn count in the configure pawns scenario parts to reflect the number of
             // pawns that were selected in Prepare Carefully.
-            ScenPart_ConfigPage_ConfigureStartingPawns originalStartingPawnsPart = originalParts.FirstOrDefault(p => p is ScenPart_ConfigPage_ConfigureStartingPawns) as ScenPart_ConfigPage_ConfigureStartingPawns;
+            ScenPart_ConfigPage_ConfigureStartingPawns originalStartingPawnsPart =
+                originalParts.FirstOrDefault(p => p is ScenPart_ConfigPage_ConfigureStartingPawns) as
+                    ScenPart_ConfigPage_ConfigureStartingPawns;
             if (originalStartingPawnsPart != null) {
-                ScenPart_ConfigPage_ConfigureStartingPawns actualStartingPawnsPart = UtilityCopy.CopyExposable(originalStartingPawnsPart);
+                ScenPart_ConfigPage_ConfigureStartingPawns actualStartingPawnsPart =
+                    UtilityCopy.CopyExposable(originalStartingPawnsPart);
                 int pawnCount = PrepareCarefully.Instance.ColonyPawns.Count;
                 actualStartingPawnsPart.pawnCount = pawnCount;
                 actualStartingPawnsPart.pawnChoiceCount = pawnCount;
@@ -334,12 +359,14 @@ namespace EdB.PrepareCarefully {
             // that could be created.  We must use a custom scatter scenario part because we need to customize the spawn
             // radius when there are large numbers of resources.
             //List<ScenPart_CustomScatterThingsNearPlayerStart> scatterParts = new List<ScenPart_CustomScatterThingsNearPlayerStart>();
-            List<ScenPart_ScatterThingsNearPlayerStart> scatterParts = new List<ScenPart_ScatterThingsNearPlayerStart>();
+            List<ScenPart_ScatterThingsNearPlayerStart>
+                scatterParts = new List<ScenPart_ScatterThingsNearPlayerStart>();
             int scatterStackCount = 0;
             foreach (var e in PrepareCarefully.Instance.Equipment) {
                 if (e.record.animal) {
                     continue;
                 }
+
                 if (!PlayerStartsWith(e)) {
                     int stacks = Mathf.CeilToInt((float)e.Count / (float)e.ThingDef.stackLimit);
                     scatterStackCount += stacks;
@@ -366,6 +393,7 @@ namespace EdB.PrepareCarefully {
                 if (e.record.animal) {
                     continue;
                 }
+
                 if (PlayerStartsWith(e)) {
                     int scatterCount = 0;
                     int nearCount = e.Count;
@@ -379,6 +407,7 @@ namespace EdB.PrepareCarefully {
                         nearCount = availableStacks * e.ThingDef.stackLimit;
                         scatterCount = e.Count - nearCount;
                     }
+
                     if (nearCount > 0) {
                         stackCount += Mathf.CeilToInt((float)nearCount / (float)e.ThingDef.stackLimit);
                         ScenPart_StartingThing_Defined part = new ScenPart_StartingThing_Defined();
@@ -392,6 +421,7 @@ namespace EdB.PrepareCarefully {
                         actualParts.Add(part);
                         vanillaFriendlyParts.Add(part);
                     }
+
                     if (scatterCount > 0) {
                         scatterCount += Mathf.CeilToInt((float)scatterCount / (float)e.ThingDef.stackLimit);
                         ScenPart_ScatterThingsNearPlayerStart part = new ScenPart_ScatterThingsNearPlayerStart();
@@ -410,11 +440,11 @@ namespace EdB.PrepareCarefully {
             Dictionary<PawnKindDef, int> animalKindCounts = new Dictionary<PawnKindDef, int>();
             foreach (var e in PrepareCarefully.Instance.Equipment) {
                 if (e.record.animal) {
-                    PawnKindDef animalKindDef = (from td in DefDatabase<PawnKindDef>.AllDefs where td.race == e.ThingDef select td).FirstOrDefault();
+                    PawnKindDef animalKindDef =
+                        (from td in DefDatabase<PawnKindDef>.AllDefs where td.race == e.ThingDef select td)
+                        .FirstOrDefault();
                     ScenPart_CustomAnimal part = new ScenPart_CustomAnimal() {
-                        Count = e.count,
-                        Gender = e.Gender,
-                        KindDef = animalKindDef
+                        Count = e.count, Gender = e.Gender, KindDef = animalKindDef
                     };
                     actualParts.Add(part);
 

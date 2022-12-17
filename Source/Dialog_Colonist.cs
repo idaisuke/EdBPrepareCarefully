@@ -1,116 +1,114 @@
-using RimWorld;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    public abstract class Dialog_Colonist : Window {
-        protected const float DeleteButtonSpace = 5;
-        protected const float MapDateExtraLeftMargin = 220;
+namespace EdB.PrepareCarefully;
 
-        private static readonly Color ManualSaveTextColor = new Color(1, 1, 0.6f);
-        private static readonly Color AutosaveTextColor = new Color(0.75f, 0.75f, 0.75f);
+public abstract class Dialog_Colonist : Window {
+    protected const float DeleteButtonSpace = 5;
+    protected const float MapDateExtraLeftMargin = 220;
 
-        protected const float MapEntrySpacing = 8;
-        protected const float BoxMargin = 20;
-        protected const float MapNameExtraLeftMargin = 15;
-        protected const float MapEntryMargin = 6;
+    protected const float MapEntrySpacing = 8;
+    protected const float BoxMargin = 20;
+    protected const float MapNameExtraLeftMargin = 15;
+    protected const float MapEntryMargin = 6;
 
-        private Vector2 scrollPosition = Vector2.zero;
+    private static readonly Color ManualSaveTextColor = new(1, 1, 0.6f);
+    private static readonly Color AutosaveTextColor = new(0.75f, 0.75f, 0.75f);
+    protected float bottomAreaHeight;
 
-        protected string interactButLabel = "Error";
-        protected float bottomAreaHeight;
+    protected string interactButLabel = "Error";
 
-        public Dialog_Colonist() {
-            this.closeOnCancel = true;
-            this.doCloseButton = true;
-            this.doCloseX = true;
-            this.absorbInputAroundWindow = true;
-            this.forcePause = true;
-        }
+    private Vector2 scrollPosition = Vector2.zero;
 
-        public override Vector2 InitialSize {
-            get {
-                return new Vector2(600, 700);
-            }
-        }
+    public Dialog_Colonist() {
+        closeOnCancel = true;
+        doCloseButton = true;
+        doCloseX = true;
+        absorbInputAroundWindow = true;
+        forcePause = true;
+    }
 
-        protected abstract void DoMapEntryInteraction(string mapName);
+    public override Vector2 InitialSize => new(600, 700);
 
-        protected virtual void DoSpecialSaveLoadGUI(Rect inRect) {
-        }
+    protected abstract void DoMapEntryInteraction(string mapName);
 
-        public override void PostClose() {
-            GUI.FocusControl(null);
-        }
+    protected virtual void DoSpecialSaveLoadGUI(Rect inRect) {
+    }
 
-        public override void DoWindowContents(Rect inRect) {
-            Vector2 vector = new Vector2(inRect.width - 16, 36);
-            Vector2 vector2 = new Vector2(100, vector.y - 6);
-            inRect.height -= 45;
-            List<FileInfo> list = ColonistFiles.AllFiles.ToList<FileInfo>();
-            float num = vector.y + 3;
-            float height = (float)list.Count * num;
-            Rect viewRect = new Rect(0, 0, inRect.width - 16, height);
-            Rect outRect = new Rect(inRect.AtZero());
-            outRect.height -= this.bottomAreaHeight;
-            Widgets.BeginScrollView(outRect, ref this.scrollPosition, viewRect);
-            try {
-                float num2 = 0;
-                int num3 = 0;
-                foreach (FileInfo current in list) {
-                    Rect rect = new Rect(0, num2, vector.x, vector.y);
-                    if (num3 % 2 == 0) {
-                        GUI.DrawTexture(rect, Textures.TextureAlternateRow);
+    public override void PostClose() {
+        GUI.FocusControl(null);
+    }
+
+    public override void DoWindowContents(Rect inRect) {
+        var vector = new Vector2(inRect.width - 16, 36);
+        var vector2 = new Vector2(100, vector.y - 6);
+        inRect.height -= 45;
+        var list = ColonistFiles.AllFiles.ToList();
+        var num = vector.y + 3;
+        var height = list.Count * num;
+        var viewRect = new Rect(0, 0, inRect.width - 16, height);
+        var outRect = new Rect(inRect.AtZero());
+        outRect.height -= bottomAreaHeight;
+        Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect);
+        try {
+            float num2 = 0;
+            var num3 = 0;
+            foreach (var current in list) {
+                var rect = new Rect(0, num2, vector.x, vector.y);
+                if (num3 % 2 == 0) {
+                    GUI.DrawTexture(rect, Textures.TextureAlternateRow);
+                }
+
+                var innerRect = new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6);
+                GUI.BeginGroup(innerRect);
+                try {
+                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(current.Name);
+                    GUI.color = ManualSaveTextColor;
+                    var rect2 = new Rect(15, 0, innerRect.width, innerRect.height);
+                    Text.Anchor = TextAnchor.MiddleLeft;
+                    Text.Font = GameFont.Small;
+                    Widgets.Label(rect2, fileNameWithoutExtension);
+                    GUI.color = Color.white;
+                    var rect3 = new Rect(250, 0, innerRect.width, innerRect.height);
+                    Text.Font = GameFont.Tiny;
+                    GUI.color = new Color(1, 1, 1, 0.5f);
+                    Widgets.Label(rect3, current.LastWriteTime.ToString("g"));
+                    GUI.color = Color.white;
+                    Text.Anchor = TextAnchor.UpperLeft;
+                    Text.Font = GameFont.Small;
+                    var num4 = vector.x - 6 - vector2.x - vector2.y;
+                    var butRect = new Rect(num4, 0, vector2.x, vector2.y);
+                    if (Widgets.ButtonText(butRect, interactButLabel, true, false)) {
+                        DoMapEntryInteraction(Path.GetFileNameWithoutExtension(current.Name));
                     }
-                    Rect innerRect = new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6);
-                    GUI.BeginGroup(innerRect);
-                    try {
-                        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(current.Name);
-                        GUI.color = ManualSaveTextColor;
-                        Rect rect2 = new Rect(15, 0, innerRect.width, innerRect.height);
-                        Text.Anchor = TextAnchor.MiddleLeft;
-                        Text.Font = GameFont.Small;
-                        Widgets.Label(rect2, fileNameWithoutExtension);
-                        GUI.color = Color.white;
-                        Rect rect3 = new Rect(250, 0, innerRect.width, innerRect.height);
-                        Text.Font = GameFont.Tiny;
-                        GUI.color = new Color(1, 1, 1, 0.5f);
-                        Widgets.Label(rect3, current.LastWriteTime.ToString("g"));
-                        GUI.color = Color.white;
-                        Text.Anchor = TextAnchor.UpperLeft;
-                        Text.Font = GameFont.Small;
-                        float num4 = vector.x - 6 - vector2.x - vector2.y;
-                        Rect butRect = new Rect(num4, 0, vector2.x, vector2.y);
-                        if (Widgets.ButtonText(butRect, this.interactButLabel, true, false, true)) {
-                            this.DoMapEntryInteraction(Path.GetFileNameWithoutExtension(current.Name));
-                        }
-                        Rect rect4 = new Rect(num4 + vector2.x + 5, 0, vector2.y, vector2.y);
-                        if (Widgets.ButtonImage(rect4, Textures.TextureDeleteX)) {
-                            FileInfo localFile = current;
-                            Find.UIRoot.windows.Add(new Dialog_Confirm("EdB.PC.Dialog.PawnPreset.ConfirmDelete".Translate(localFile.Name), delegate {
+
+                    var rect4 = new Rect(num4 + vector2.x + 5, 0, vector2.y, vector2.y);
+                    if (Widgets.ButtonImage(rect4, Textures.TextureDeleteX)) {
+                        var localFile = current;
+                        Find.UIRoot.windows.Add(new Dialog_Confirm(
+                            "EdB.PC.Dialog.PawnPreset.ConfirmDelete".Translate(localFile.Name), delegate {
                                 localFile.Delete();
                             }, true, null, true));
-                        }
-                        TooltipHandler.TipRegion(rect4, "EdB.PC.Dialog.PawnPreset.DeleteTooltip".Translate());
                     }
-                    finally {
-                        GUI.EndGroup();
-                    }
-                    num2 += vector.y + 3;
-                    num3++;
+
+                    TooltipHandler.TipRegion(rect4, "EdB.PC.Dialog.PawnPreset.DeleteTooltip".Translate());
                 }
+                finally {
+                    GUI.EndGroup();
+                }
+
+                num2 += vector.y + 3;
+                num3++;
             }
-            finally {
-                Widgets.EndScrollView();
-                Text.Anchor = TextAnchor.UpperLeft;
-                Text.Font = GameFont.Small;
-            }
-            this.DoSpecialSaveLoadGUI(inRect.AtZero());
         }
+        finally {
+            Widgets.EndScrollView();
+            Text.Anchor = TextAnchor.UpperLeft;
+            Text.Font = GameFont.Small;
+        }
+
+        DoSpecialSaveLoadGUI(inRect.AtZero());
     }
 }
-

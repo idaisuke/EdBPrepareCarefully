@@ -1,54 +1,38 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using UnityEngine;
+﻿using System.Collections.Generic;
+using RimWorld;
 using Verse;
-using Verse.Sound;
 
-namespace EdB.PrepareCarefully {
-    public class OptionsBodyType {
-        protected List<BodyTypeDef> maleBodyTypes = new List<BodyTypeDef>();
-        protected List<BodyTypeDef> femaleBodyTypes = new List<BodyTypeDef>();
-        protected List<BodyTypeDef> noGenderBodyTypes = new List<BodyTypeDef>();
-        public OptionsBodyType() {
+namespace EdB.PrepareCarefully;
+
+public class OptionsBodyType {
+    protected List<BodyTypeDef> femaleBodyTypes = new();
+    protected List<BodyTypeDef> maleBodyTypes = new();
+    protected List<BodyTypeDef> noGenderBodyTypes = new();
+
+    public List<BodyTypeDef> MaleBodyTypes {
+        get => maleBodyTypes;
+        set => maleBodyTypes = value;
+    }
+
+    public List<BodyTypeDef> FemaleBodyTypes {
+        get => femaleBodyTypes;
+        set => femaleBodyTypes = value;
+    }
+
+    public List<BodyTypeDef> NoGenderBodyTypes {
+        get => noGenderBodyTypes;
+        set => noGenderBodyTypes = value;
+    }
+
+    public List<BodyTypeDef> GetBodyTypes(Gender gender) {
+        if (gender == Gender.Male) {
+            return maleBodyTypes;
         }
-        public List<BodyTypeDef> MaleBodyTypes {
-            get {
-                return maleBodyTypes;
-            }
-            set {
-                maleBodyTypes = value;
-            }
+
+        if (gender == Gender.Female) {
+            return femaleBodyTypes;
         }
-        public List<BodyTypeDef> FemaleBodyTypes {
-            get {
-                return femaleBodyTypes;
-            }
-            set {
-                femaleBodyTypes = value;
-            }
-        }
-        public List<BodyTypeDef> NoGenderBodyTypes {
-            get {
-                return noGenderBodyTypes;
-            }
-            set {
-                noGenderBodyTypes = value;
-            }
-        }
-        public List<BodyTypeDef> GetBodyTypes(Gender gender) {
-            if (gender == Gender.Male) {
-                return maleBodyTypes;
-            }
-            else if (gender == Gender.Female) {
-                return femaleBodyTypes;
-            }
-            else {
-                return noGenderBodyTypes;
-            }
-        }
+
+        return noGenderBodyTypes;
     }
 }

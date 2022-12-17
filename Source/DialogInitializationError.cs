@@ -1,39 +1,33 @@
-using RimWorld;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class DialogInitializationError : Window {
+namespace EdB.PrepareCarefully;
 
-        private Exception exception;
+public class DialogInitializationError : Window {
+    private Exception exception;
 
-        public override Vector2 InitialSize {
-            get {
-                return new Vector2(500f, 400f);
-            }
+    public DialogInitializationError(Exception exception) {
+        this.exception = exception;
+        forcePause = true;
+        absorbInputAroundWindow = true;
+        closeOnClickedOutside = false;
+        closeOnAccept = true;
+        doCloseButton = true;
+    }
+
+    public override Vector2 InitialSize => new(500f, 400f);
+
+    public override void DoWindowContents(Rect inRect) {
+        Text.Font = GameFont.Small;
+        if (VersionControl.CurrentVersion < PrepareCarefully.MinimumGameVersion) {
+            Widgets.Label(inRect,
+                "EdB.PC.Error.GameVersion".Translate(VersionControl.CurrentVersionString,
+                    PrepareCarefully.MinimumGameVersion.ToString()));
         }
-
-        public DialogInitializationError(Exception exception) {
-            this.exception = exception;
-            this.forcePause = true;
-            this.absorbInputAroundWindow = true;
-            this.closeOnClickedOutside = false;
-            this.closeOnAccept = true;
-            this.doCloseButton = true;
-        }
-
-        public override void DoWindowContents(Rect inRect) {
-            Text.Font = GameFont.Small;
-            if (VersionControl.CurrentVersion < PrepareCarefully.MinimumGameVersion) {
-                Widgets.Label(inRect, "EdB.PC.Error.GameVersion".Translate(VersionControl.CurrentVersionString, PrepareCarefully.MinimumGameVersion.ToString()));
-            }
-            else {
-                Widgets.Label(inRect, "EdB.PC.Error.Initialization".Translate());
-            }
+        else {
+            Widgets.Label(inRect, "EdB.PC.Error.Initialization".Translate());
         }
     }
 }

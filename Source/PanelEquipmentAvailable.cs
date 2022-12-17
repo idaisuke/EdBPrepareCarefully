@@ -1,63 +1,80 @@
-using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+
 namespace EdB.PrepareCarefully {
     public class PanelEquipmentAvailable : PanelBase {
         public delegate void AddEquipmentHandler(EquipmentRecord entry);
 
-        public event AddEquipmentHandler EquipmentAdded;
-
-        public class ViewEquipmentList {
-            public WidgetTable<EquipmentRecord> Table;
-            public List<EquipmentRecord> List;
-        }
         public static readonly string ColumnNameInfo = "Info";
         public static readonly string ColumnNameIcon = "Icon";
         public static readonly string ColumnNameName = "Name";
         public static readonly string ColumnNameCost = "Cost";
-
-        public StatDef marketValueStatDef = null;
-
-        protected Rect RectDropdownTypes;
-        protected Rect RectDropdownMaterials;
-        protected Rect RectDropdownQuality;
-        protected Rect RectListHeader;
-        protected Rect RectListBody;
-        protected Rect RectInfoButton;
-        protected Rect RectColumnHeaderName;
-        protected Rect RectColumnHeaderCost;
-        protected Rect RectScrollFrame;
-        protected Rect RectScrollView;
-        protected Rect RectRow;
-        protected Rect RectItem;
-        protected Rect RectAddButton;
         protected static Vector2 SizeTextureSortIndicator = new Vector2(8, 4);
-        protected ProviderEquipmentTypes providerEquipment;
-        protected EquipmentType selectedType = null;
-        protected ScrollViewVertical scrollView = new ScrollViewVertical();
+
+        protected readonly Vector2 ProgressBarSize = new Vector2(250, 18);
+
         protected Dictionary<EquipmentType, ViewEquipmentList> equipmentViews =
             new Dictionary<EquipmentType, ViewEquipmentList>();
-        private HashSet<ThingDef> stuffFilterSet = new HashSet<ThingDef>();
-        private ThingDef filterStuff = null;
+
         private bool filterMadeFromStuff = true;
+        private ThingDef filterStuff = null;
         private bool loading = true;
+
+        public StatDef marketValueStatDef = null;
+        protected ProviderEquipmentTypes providerEquipment;
+        protected Rect RectAddButton;
+        protected Rect RectColumnHeaderCost;
+        protected Rect RectColumnHeaderName;
+        protected Rect RectDropdownMaterials;
+        protected Rect RectDropdownQuality;
+
+        protected Rect RectDropdownTypes;
+        protected Rect RectInfoButton;
+        protected Rect RectItem;
+        protected Rect RectListBody;
+        protected Rect RectListHeader;
+        protected Rect RectRow;
+        protected Rect RectScrollFrame;
+        protected Rect RectScrollView;
+        protected ScrollViewVertical scrollView = new ScrollViewVertical();
+        protected EquipmentType selectedType = null;
+        private HashSet<ThingDef> stuffFilterSet = new HashSet<ThingDef>();
 
         public PanelEquipmentAvailable() {
         }
+
+        protected ViewEquipmentList CurrentView {
+            get {
+                if (selectedType == null) {
+                    selectedType = providerEquipment.Types.First();
+                    UpdateAvailableMaterials();
+                }
+
+                return equipmentViews[selectedType];
+            }
+        }
+
+        protected bool StuffFilterVisible {
+            get {
+                return stuffFilterSet.Count > 0;
+            }
+        }
+
+        public event AddEquipmentHandler EquipmentAdded;
+
         public override void Resize(Rect rect) {
             base.Resize(rect);
 
-            if (marketValueStatDef ==  null) {
+            if (marketValueStatDef == null) {
                 marketValueStatDef = StatDefOf.MarketValue;
             }
 
             Vector2 padding = new Vector2(12, 12);
-            
+
             RectDropdownTypes = new Rect(padding.x, padding.y, 140, 28);
             RectDropdownMaterials = new Rect(RectDropdownTypes.xMax + 8, RectDropdownTypes.yMin, 160, 28);
 
@@ -95,9 +112,11 @@ namespace EdB.PrepareCarefully {
             if (providerEquipment == null) {
                 providerEquipment = new ProviderEquipmentTypes();
             }
+
             if (!providerEquipment.DatabaseReady) {
                 return;
             }
+
             foreach (var type in providerEquipment.Types) {
                 if (!equipmentViews.ContainsKey(type)) {
                     WidgetTable<EquipmentRecord> table = new WidgetTable<EquipmentRecord>();
@@ -120,8 +139,10 @@ namespace EdB.PrepareCarefully {
                     table.AddColumn(new WidgetTable<EquipmentRecord>.Column() {
                         Width = columnWidthInfo,
                         Name = ColumnNameInfo,
-                        DrawAction = (EquipmentRecord entry, Rect columnRect, WidgetTable<EquipmentRecord>.Metadata metadata) => {
-                            Rect infoRect = new Rect(columnRect.MiddleX() - sizeInfoButton.HalfX(), columnRect.MiddleY() - sizeInfoButton.HalfY(), sizeInfoButton.x, sizeInfoButton.y);
+                        DrawAction = (EquipmentRecord entry, Rect columnRect,
+                            WidgetTable<EquipmentRecord>.Metadata metadata) => {
+                            Rect infoRect = new Rect(columnRect.MiddleX() - sizeInfoButton.HalfX(),
+                                columnRect.MiddleY() - sizeInfoButton.HalfY(), sizeInfoButton.x, sizeInfoButton.y);
                             Style.SetGUIColorForButton(infoRect);
                             GUI.DrawTexture(infoRect, Textures.TextureButtonInfo);
                             if (Widgets.ButtonInvisible(infoRect)) {
@@ -135,13 +156,15 @@ namespace EdB.PrepareCarefully {
                                     Find.WindowStack.Add((Window)new Dialog_InfoCard(entry.def));
                                 }
                             }
+
                             GUI.color = Color.white;
                         }
                     });
                     table.AddColumn(new WidgetTable<EquipmentRecord>.Column() {
                         Width = columnWidthIcon,
                         Name = ColumnNameIcon,
-                        DrawAction = (EquipmentRecord entry, Rect columnRect, WidgetTable<EquipmentRecord>.Metadata metadata) => {
+                        DrawAction = (EquipmentRecord entry, Rect columnRect,
+                            WidgetTable<EquipmentRecord>.Metadata metadata) => {
                             WidgetEquipmentIcon.Draw(columnRect, entry);
                         }
                     });
@@ -151,7 +174,8 @@ namespace EdB.PrepareCarefully {
                         Label = "Name",
                         AdjustForScrollbars = true,
                         AllowSorting = true,
-                        DrawAction = (EquipmentRecord entry, Rect columnRect, WidgetTable<EquipmentRecord>.Metadata metadata) => {
+                        DrawAction = (EquipmentRecord entry, Rect columnRect,
+                            WidgetTable<EquipmentRecord>.Metadata metadata) => {
                             columnRect = columnRect.InsetBy(nameOffset.x, 0, 0, 0);
                             GUI.color = Style.ColorText;
                             Text.Font = GameFont.Small;
@@ -168,12 +192,14 @@ namespace EdB.PrepareCarefully {
                         Label = "Cost",
                         AdjustForScrollbars = false,
                         AllowSorting = true,
-                        DrawAction = (EquipmentRecord entry, Rect columnRect, WidgetTable<EquipmentRecord>.Metadata metadata) => {
+                        DrawAction = (EquipmentRecord entry, Rect columnRect,
+                            WidgetTable<EquipmentRecord>.Metadata metadata) => {
                             GUI.color = Style.ColorText;
                             Text.Font = GameFont.Small;
                             Text.Anchor = TextAnchor.MiddleRight;
                             string costString = GenText.ToStringByStyle((float)entry.cost, ToStringStyle.FloatTwo);
-                            Widgets.Label(new Rect(columnRect.x, columnRect.y, columnRect.width, columnRect.height), costString);
+                            Widgets.Label(new Rect(columnRect.x, columnRect.y, columnRect.width, columnRect.height),
+                                costString);
                             GUI.color = Color.white;
                             Text.Anchor = TextAnchor.UpperLeft;
                         },
@@ -181,14 +207,14 @@ namespace EdB.PrepareCarefully {
                     });
                     table.SetSortState(ColumnNameName, 1);
                     ViewEquipmentList view = new ViewEquipmentList() {
-                        Table = table,
-                        List = providerEquipment.AllEquipmentOfType(type).ToList()
+                        Table = table, List = providerEquipment.AllEquipmentOfType(type).ToList()
                     };
                     SortByName(view, 1);
                     equipmentViews.Add(type, view);
                 }
             }
         }
+
         protected override void DrawPanelContent(State state) {
             base.DrawPanelContent(state);
 
@@ -212,7 +238,8 @@ namespace EdB.PrepareCarefully {
             DrawFilters(view);
             DrawEquipmentList(view);
 
-            if (Widgets.ButtonText(RectAddButton, "EdB.PC.Panel.AvailableEquipment.Add".Translate(), true, false, view.Table.Selected != null)) {
+            if (Widgets.ButtonText(RectAddButton, "EdB.PC.Panel.AvailableEquipment.Add".Translate(), true, false,
+                    view.Table.Selected != null)) {
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
                 EquipmentAdded(view.Table.Selected);
             }
@@ -226,14 +253,15 @@ namespace EdB.PrepareCarefully {
                     stuffFilterSet.Add(item.stuffDef);
                 }
             }
+
             if (filterStuff != null && !stuffFilterSet.Contains(filterStuff)) {
                 filterStuff = null;
             }
         }
 
-        protected readonly Vector2 ProgressBarSize = new Vector2(250, 18);
         protected void DrawLoadingProgress() {
-            Rect progressBarRect = new Rect(PanelRect.HalfWidth() - ProgressBarSize.x * 0.5f, PanelRect.HalfHeight() - ProgressBarSize.y * 0.5f,
+            Rect progressBarRect = new Rect(PanelRect.HalfWidth() - ProgressBarSize.x * 0.5f,
+                PanelRect.HalfHeight() - ProgressBarSize.y * 0.5f,
                 ProgressBarSize.x, ProgressBarSize.y);
             var progress = providerEquipment.LoadingProgress;
             GUI.color = Color.gray;
@@ -243,8 +271,10 @@ namespace EdB.PrepareCarefully {
                 int processed = progress.stuffProcessed + progress.thingsProcessed;
                 float percent = (float)processed / (float)totalCount;
                 float barWidth = progressBarRect.width * percent;
-                Widgets.DrawRectFast(new Rect(progressBarRect.x, progressBarRect.y, barWidth, progressBarRect.height), Color.green);
+                Widgets.DrawRectFast(new Rect(progressBarRect.x, progressBarRect.y, barWidth, progressBarRect.height),
+                    Color.green);
             }
+
             GUI.color = Style.ColorText;
             Text.Font = GameFont.Tiny;
             string label = "EdB.PC.Equipment.LoadingProgress.Initializing".Translate();
@@ -257,7 +287,8 @@ namespace EdB.PrepareCarefully {
             else if (progress.phase == EquipmentDatabase.LoadingPhase.Loaded) {
                 label = "EdB.PC.Equipment.LoadingProgress.Finished".Translate();
             }
-            Widgets.Label(new Rect(progressBarRect.x, progressBarRect.yMax + 2, progressBarRect.width, 20), label) ;
+
+            Widgets.Label(new Rect(progressBarRect.x, progressBarRect.yMax + 2, progressBarRect.width, 20), label);
             Text.Font = GameFont.Small;
             GUI.color = Color.white;
         }
@@ -273,6 +304,7 @@ namespace EdB.PrepareCarefully {
                         this.UpdateAvailableMaterials();
                     }, MenuOptionPriority.Default, null, null, 0, null, null));
                 }
+
                 Find.WindowStack.Add(new FloatMenu(list, null, false));
             }
 
@@ -287,31 +319,25 @@ namespace EdB.PrepareCarefully {
                 else {
                     stuffLabel = filterStuff.LabelCap;
                 }
+
                 if (WidgetDropdown.Button(RectDropdownMaterials, stuffLabel, true, false, true)) {
                     List<FloatMenuOption> stuffFilterOptions = new List<FloatMenuOption>();
-                    stuffFilterOptions.Add(new FloatMenuOption("EdB.PC.Panel.AvailableEquipment.Materials.All".Translate(), () => {
-                        UpdateStuffFilter(true, null);
-                    }, MenuOptionPriority.Default, null, null, 0, null, null));
-                    stuffFilterOptions.Add(new FloatMenuOption("EdB.PC.Panel.AvailableEquipment.Materials.None".Translate(), () => {
-                        UpdateStuffFilter(false, null);
-                    }, MenuOptionPriority.Default, null, null, 0, null, null));
+                    stuffFilterOptions.Add(new FloatMenuOption(
+                        "EdB.PC.Panel.AvailableEquipment.Materials.All".Translate(), () => {
+                            UpdateStuffFilter(true, null);
+                        }, MenuOptionPriority.Default, null, null, 0, null, null));
+                    stuffFilterOptions.Add(new FloatMenuOption(
+                        "EdB.PC.Panel.AvailableEquipment.Materials.None".Translate(), () => {
+                            UpdateStuffFilter(false, null);
+                        }, MenuOptionPriority.Default, null, null, 0, null, null));
                     foreach (var item in stuffFilterSet.OrderBy((ThingDef def) => { return def.LabelCap.Resolve(); })) {
                         stuffFilterOptions.Add(new FloatMenuOption(item.LabelCap, () => {
                             UpdateStuffFilter(true, item);
                         }, MenuOptionPriority.Default, null, null, 0, null, null));
                     }
+
                     Find.WindowStack.Add(new FloatMenu(stuffFilterOptions, null, false));
                 }
-            }
-        }
-
-        protected ViewEquipmentList CurrentView {
-            get {
-                if (selectedType == null) {
-                    selectedType = providerEquipment.Types.First();
-                    UpdateAvailableMaterials();
-                }
-                return equipmentViews[selectedType];
             }
         }
 
@@ -321,15 +347,9 @@ namespace EdB.PrepareCarefully {
             ViewEquipmentList view = CurrentView;
             IEnumerable<EquipmentRecord> entries = FilterEquipmentList(view);
             if (!entries.Any((EquipmentRecord e) => {
-                return e == view.Table.Selected;
-            })) {
+                    return e == view.Table.Selected;
+                })) {
                 view.Table.Selected = entries.FirstOrDefault();
-            }
-        }
-
-        protected bool StuffFilterVisible {
-            get {
-                return stuffFilterSet.Count > 0;
             }
         }
 
@@ -350,6 +370,7 @@ namespace EdB.PrepareCarefully {
                     }
                 });
             }
+
             return view.List;
         }
 
@@ -358,6 +379,7 @@ namespace EdB.PrepareCarefully {
             if (view == null) {
                 return;
             }
+
             if (column != null) {
                 if (column.Name == ColumnNameName) {
                     SortByName(view, direction);
@@ -378,6 +400,7 @@ namespace EdB.PrepareCarefully {
                 view.List.SortByDescending((EquipmentRecord arg) => { return arg.Label; });
             }
         }
+
         protected void SortByCost(ViewEquipmentList view, int direction) {
             view.List.Sort((EquipmentRecord x, EquipmentRecord y) => {
                 if (direction == 1) {
@@ -392,8 +415,14 @@ namespace EdB.PrepareCarefully {
                         return result;
                     }
                 }
+
                 return x.Label.CompareTo(y.Label);
             });
+        }
+
+        public class ViewEquipmentList {
+            public List<EquipmentRecord> List;
+            public WidgetTable<EquipmentRecord> Table;
         }
     }
 }

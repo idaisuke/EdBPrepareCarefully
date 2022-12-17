@@ -1,23 +1,21 @@
-﻿using System;
-using Verse;
+﻿using Verse;
 
-namespace EdB.PrepareCarefully {
-    public interface IEquipment {
-        int Count {
-            get;
-        }
+namespace EdB.PrepareCarefully;
 
-        ThingDef ThingDef {
-            get;
-        }
+public interface IEquipment {
+    int Count {
+        get;
+    }
 
-        ThingDef StuffDef {
-            get;
-        }
+    ThingDef ThingDef {
+        get;
+    }
 
-        Gender Gender {
-            get;
-        }
+    ThingDef StuffDef {
+        get;
+    }
+
+    Gender Gender {
+        get;
     }
 }
-

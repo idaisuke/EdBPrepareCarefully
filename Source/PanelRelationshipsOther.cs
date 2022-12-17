@@ -1,43 +1,42 @@
-using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace EdB.PrepareCarefully {
     public class PanelRelationshipsOther : PanelBase {
         public delegate void AddRelationshipHandler(PawnRelationDef def, CustomPawn source, CustomPawn target);
+
         public delegate void RemoveRelationshipHandler(CustomRelationship relationship);
 
-        public event AddRelationshipHandler RelationshipAdded;
-        public event RemoveRelationshipHandler RelationshipRemoved;
-
-        private ScrollViewVertical scrollView = new ScrollViewVertical();
-        private Rect RectScrollView;
-        private Vector2 SizePawn;
-        private Vector2 SizeRelationship;
-        private Vector2 SizeArrow;
-        private Vector2 SizeLabelSpacing;
-        private float HeightLabel = 20;
-        private Vector2 SizeRelationshipSpacing;
+        private Color ColorPawnNew = new Color(44f / 255f, 45f / 255f, 46f / 255f);
         private Color ColorPawnSource = new Color(69f / 255f, 70f / 255f, 72f / 255f);
         private Color ColorPawnTarget = new Color(20f / 255f, 20f / 255f, 21f / 255f);
-        private Color ColorPawnNew = new Color(44f / 255f, 45f / 255f, 46f / 255f);
-        private float SpacingGender = 9;
-        private Vector2 SizeGender = new Vector2(48, 48);
-
-        protected List<PawnRelationDef> relationDefs = new List<PawnRelationDef>();
         protected HashSet<PawnRelationDef> disabledRelationships = new HashSet<PawnRelationDef>();
         protected HashSet<CustomPawn> disabledTargets = new HashSet<CustomPawn>();
+        private float HeightLabel = 20;
+        private Rect RectScrollView;
+
+        protected List<PawnRelationDef> relationDefs = new List<PawnRelationDef>();
         protected List<CustomRelationship> relationshipsToDelete = new List<CustomRelationship>();
+
+        private ScrollViewVertical scrollView = new ScrollViewVertical();
+        private Vector2 SizeArrow;
+        private Vector2 SizeGender = new Vector2(48, 48);
+        private Vector2 SizeLabelSpacing;
+        private Vector2 SizePawn;
+        private Vector2 SizeRelationship;
+        private Vector2 SizeRelationshipSpacing;
+        private float SpacingGender = 9;
+
         public PanelRelationshipsOther() {
             relationDefs.AddRange(DefDatabase<PawnRelationDef>.AllDefs.ToList().FindAll((PawnRelationDef def) => {
                 if (def.familyByBloodRelation) {
                     return false;
                 }
+
                 MethodInfo info = ReflectionUtil.Method(def.workerClass, "CreateRelation");
                 if (info == null) {
                     return false;
@@ -47,15 +46,21 @@ namespace EdB.PrepareCarefully {
                 }
             }));
         }
+
         public override string PanelHeader {
             get {
                 return "EdB.PC.Panel.RelationshipsOther.Title".Translate();
             }
         }
+
+        public event AddRelationshipHandler RelationshipAdded;
+        public event RemoveRelationshipHandler RelationshipRemoved;
+
         public override void Resize(Rect rect) {
             base.Resize(rect);
             Vector2 padding = Style.SizePanelPadding;
-            RectScrollView = new Rect(padding.x, BodyRect.y, rect.width - padding.x * 2, rect.height - BodyRect.y - padding.y);
+            RectScrollView = new Rect(padding.x, BodyRect.y, rect.width - padding.x * 2,
+                rect.height - BodyRect.y - padding.y);
 
             SizeRelationshipSpacing = new Vector2(20, 10);
             SizePawn = new Vector2(90, 90);
@@ -63,6 +68,7 @@ namespace EdB.PrepareCarefully {
             SizeArrow = new Vector2(16, 32);
             SizeLabelSpacing = new Vector2(4, 21);
         }
+
         protected override void DrawPanelContent(State state) {
             base.DrawPanelContent(state);
             Vector2 cursor = Vector2.zero;
@@ -70,12 +76,15 @@ namespace EdB.PrepareCarefully {
             GUI.BeginGroup(RectScrollView);
             scrollView.Begin(new Rect(Vector2.zero, RectScrollView.size));
             try {
-                foreach (CustomRelationship relationship in PrepareCarefully.Instance.RelationshipManager.Relationships) {
+                foreach (CustomRelationship relationship in
+                         PrepareCarefully.Instance.RelationshipManager.Relationships) {
                     // Don't show relationships between two hidden pawns
-                    if (relationship.source.Type != CustomPawnType.Hidden && relationship.target.Type != CustomPawnType.Hidden) {
+                    if (relationship.source.Type != CustomPawnType.Hidden &&
+                        relationship.target.Type != CustomPawnType.Hidden) {
                         cursor = DrawRelationship(cursor, relationship);
                     }
                 }
+
                 cursor = DrawNextRelationship(cursor);
 
                 if (cursor.x == 0) {
@@ -91,22 +100,30 @@ namespace EdB.PrepareCarefully {
                 foreach (var r in relationshipsToDelete) {
                     RelationshipRemoved(r);
                 }
+
                 relationshipsToDelete.Clear();
             }
         }
+
         private string GetProfessionLabel(CustomPawn pawn) {
             if (pawn == null) {
                 Logger.Warning("Could not get profession label for null pawn");
                 return "";
             }
+
             bool hidden = pawn.Type == CustomPawnType.Hidden || pawn.Type == CustomPawnType.Temporary;
             if (!hidden) {
-                return pawn.Type == CustomPawnType.Colonist ? "EdB.PC.AddParentChild.Colony".Translate() : "EdB.PC.AddParentChild.World".Translate();
+                return pawn.Type == CustomPawnType.Colonist
+                    ? "EdB.PC.AddParentChild.Colony".Translate()
+                    : "EdB.PC.AddParentChild.World".Translate();
             }
             else {
-                return pawn.Type == CustomPawnType.Temporary ? "EdB.PC.AddParentChild.Temporary".Translate() : "EdB.PC.AddParentChild.World".Translate();
+                return pawn.Type == CustomPawnType.Temporary
+                    ? "EdB.PC.AddParentChild.Temporary".Translate()
+                    : "EdB.PC.AddParentChild.World".Translate();
             }
         }
+
         protected void DrawPortrait(Rect rect, CustomPawn pawn) {
             bool hidden = pawn.Type == CustomPawnType.Hidden || pawn.Type == CustomPawnType.Temporary;
             if (!hidden) {
@@ -117,7 +134,8 @@ namespace EdB.PrepareCarefully {
             }
             else {
                 GUI.color = Style.ColorButton;
-                Rect portraitRect = new Rect(rect.MiddleX() - SizeGender.HalfX(), rect.y + SpacingGender, SizeGender.x, SizeGender.y);
+                Rect portraitRect = new Rect(rect.MiddleX() - SizeGender.HalfX(), rect.y + SpacingGender, SizeGender.x,
+                    SizeGender.y);
                 if (pawn.Gender == Gender.Female) {
                     GUI.DrawTexture(portraitRect, Textures.TextureGenderFemaleLarge);
                 }
@@ -129,6 +147,7 @@ namespace EdB.PrepareCarefully {
                 }
             }
         }
+
         protected Vector2 DrawRelationship(Vector2 cursor, CustomRelationship relationship) {
             if (cursor.x + SizeRelationship.x > RectScrollView.width) {
                 cursor.x = 0;
@@ -167,7 +186,8 @@ namespace EdB.PrepareCarefully {
                 relationshipsToDelete.Add(relationship);
             }
 
-            Rect targetPawnRect = new Rect(cursor.x + SizeRelationship.x - SizePawn.x, cursor.y, SizePawn.x, SizePawn.y);
+            Rect targetPawnRect =
+                new Rect(cursor.x + SizeRelationship.x - SizePawn.x, cursor.y, SizePawn.x, SizePawn.y);
             GUI.color = ColorPawnTarget;
             GUI.DrawTexture(targetPawnRect, BaseContent.WhiteTex);
             GUI.color = Color.white;
@@ -187,31 +207,38 @@ namespace EdB.PrepareCarefully {
             GUI.color = Color.white;
 
             DrawPortrait(targetPawnRect, relationship.target);
-            
+
             TooltipHandler.TipRegion(targetPawnRect, GetTooltipText(relationship.target));
 
-            Rect sourceRelLabelRect = new Rect(sourcePawnRect.xMax, sourcePawnRect.y + SizeLabelSpacing.y, targetPawnRect.x - sourcePawnRect.xMax, HeightLabel);
+            Rect sourceRelLabelRect = new Rect(sourcePawnRect.xMax, sourcePawnRect.y + SizeLabelSpacing.y,
+                targetPawnRect.x - sourcePawnRect.xMax, HeightLabel);
             sourceRelLabelRect.width -= (SizeArrow.x + SizeLabelSpacing.x);
             GUI.color = ColorPawnSource;
             GUI.DrawTexture(sourceRelLabelRect, BaseContent.WhiteTex);
-            Rect sourceRelArrowRect = new Rect(sourceRelLabelRect.xMax, sourceRelLabelRect.MiddleY() - SizeArrow.HalfY(), SizeArrow.x, SizeArrow.y);
+            Rect sourceRelArrowRect = new Rect(sourceRelLabelRect.xMax,
+                sourceRelLabelRect.MiddleY() - SizeArrow.HalfY(), SizeArrow.x, SizeArrow.y);
             GUI.DrawTexture(sourceRelArrowRect, Textures.TextureArrowRight);
             Text.Font = GameFont.Tiny;
             Text.Anchor = TextAnchor.MiddleCenter;
             GUI.color = Style.ColorText;
-            Widgets.Label(sourceRelLabelRect.OffsetBy(0, 1), relationship.inverseDef.GetGenderSpecificLabelCap(relationship.source.Pawn));
+            Widgets.Label(sourceRelLabelRect.OffsetBy(0, 1),
+                relationship.inverseDef.GetGenderSpecificLabelCap(relationship.source.Pawn));
 
-            Rect targetRelLabelRect = new Rect(sourcePawnRect.xMax, targetPawnRect.yMax - SizeLabelSpacing.y - HeightLabel, targetPawnRect.x - sourcePawnRect.xMax, HeightLabel);
+            Rect targetRelLabelRect = new Rect(sourcePawnRect.xMax,
+                targetPawnRect.yMax - SizeLabelSpacing.y - HeightLabel, targetPawnRect.x - sourcePawnRect.xMax,
+                HeightLabel);
             targetRelLabelRect.width -= (SizeArrow.x + SizeLabelSpacing.x);
             targetRelLabelRect.x += (SizeArrow.x + SizeLabelSpacing.x);
             GUI.color = ColorPawnTarget;
             GUI.DrawTexture(targetRelLabelRect, BaseContent.WhiteTex);
-            Rect targetRelArrowRect = new Rect(targetRelLabelRect.xMin - SizeArrow.x, targetRelLabelRect.MiddleY() - SizeArrow.HalfY(), SizeArrow.x, SizeArrow.y);
+            Rect targetRelArrowRect = new Rect(targetRelLabelRect.xMin - SizeArrow.x,
+                targetRelLabelRect.MiddleY() - SizeArrow.HalfY(), SizeArrow.x, SizeArrow.y);
             GUI.DrawTexture(targetRelArrowRect, Textures.TextureArrowLeft);
             Text.Font = GameFont.Tiny;
             Text.Anchor = TextAnchor.MiddleCenter;
             GUI.color = Style.ColorText;
-            Widgets.Label(targetRelLabelRect.OffsetBy(0, 1), relationship.def.GetGenderSpecificLabelCap(relationship.target.Pawn));
+            Widgets.Label(targetRelLabelRect.OffsetBy(0, 1),
+                relationship.def.GetGenderSpecificLabelCap(relationship.target.Pawn));
 
             Text.Anchor = TextAnchor.UpperLeft;
             Text.Font = GameFont.Small;
@@ -224,9 +251,12 @@ namespace EdB.PrepareCarefully {
         protected string GetTooltipText(CustomPawn pawn) {
             bool hidden = pawn.Type == CustomPawnType.Hidden || pawn.Type == CustomPawnType.Temporary;
             if (!hidden) {
-                string age = (pawn.ChronologicalAge == pawn.BiologicalAge) ? "EdB.PC.Pawn.AgeWithoutChronological".Translate(pawn.BiologicalAge)
+                string age = (pawn.ChronologicalAge == pawn.BiologicalAge)
+                    ? "EdB.PC.Pawn.AgeWithoutChronological".Translate(pawn.BiologicalAge)
                     : "EdB.PC.Pawn.AgeWithChronological".Translate(pawn.BiologicalAge, pawn.ChronologicalAge);
-                string description = (pawn.Gender != Gender.None) ? "EdB.PC.Pawn.PawnDescriptionWithGender".Translate(pawn.ProfessionLabel, pawn.Gender.GetLabel(), age)
+                string description = (pawn.Gender != Gender.None)
+                    ? "EdB.PC.Pawn.PawnDescriptionWithGender".Translate(pawn.ProfessionLabel, pawn.Gender.GetLabel(),
+                        age)
                     : "EdB.PC.AddParentChild.PawnDescriptionWithNoGender".Translate(pawn.ProfessionLabel, age);
                 return pawn.Pawn.Name.ToStringFull + "\n" + description;
             }
@@ -248,20 +278,23 @@ namespace EdB.PrepareCarefully {
             else {
                 GUI.color = ColorPawnNew;
             }
+
             GUI.DrawTexture(pawnRect, BaseContent.WhiteTex);
             GUI.color = Color.white;
 
             float addButtonPadding = 4;
             Vector2 addButtonSize = new Vector2(16, 16);
             // Draw the add button.
-            Rect addButtonRect = new Rect(pawnRect.xMax - addButtonSize.x - addButtonPadding, pawnRect.y + 4, addButtonSize.x, addButtonSize.y);
+            Rect addButtonRect = new Rect(pawnRect.xMax - addButtonSize.x - addButtonPadding, pawnRect.y + 4,
+                addButtonSize.x, addButtonSize.y);
             Style.SetGUIColorForButton(pawnRect);
             GUI.DrawTexture(addButtonRect, Textures.TextureButtonAdd);
             if (Widgets.ButtonInvisible(pawnRect, false)) {
                 ShowAddRelationshipDialogs();
             }
+
             GUI.color = Color.white;
-            
+
             return new Vector2(cursor.x + SizeRelationship.x + SizeRelationshipSpacing.x, cursor.y);
         }
 
@@ -298,9 +331,11 @@ namespace EdB.PrepareCarefully {
                 };
 
             List<WidgetTable<CustomPawn>.RowGroup> sourceRowGroups = new List<WidgetTable<CustomPawn>.RowGroup>();
-            sourceRowGroups.Add(new WidgetTable<CustomPawn>.RowGroup("EdB.PC.AddParentChild.Header.SelectColonist".Translate(),
+            sourceRowGroups.Add(new WidgetTable<CustomPawn>.RowGroup(
+                "EdB.PC.AddParentChild.Header.SelectColonist".Translate(),
                 PrepareCarefully.Instance.RelationshipManager.AvailableColonyPawns));
-            List<CustomPawn> hiddenPawnsForSource = PrepareCarefully.Instance.RelationshipManager.AvailableHiddenPawns.ToList();
+            List<CustomPawn> hiddenPawnsForSource =
+                PrepareCarefully.Instance.RelationshipManager.AvailableHiddenPawns.ToList();
             hiddenPawnsForSource.Sort((a, b) => {
                 if (a.Type != b.Type) {
                     return a.Type == CustomPawnType.Hidden ? -1 : 1;
@@ -311,9 +346,11 @@ namespace EdB.PrepareCarefully {
                     return aInt.CompareTo(bInt);
                 }
             });
-            sourceRowGroups.Add(new WidgetTable<CustomPawn>.RowGroup("<b>" + "EdB.PC.AddParentChild.Header.SelectWorldPawn".Translate() + "</b>",
+            sourceRowGroups.Add(new WidgetTable<CustomPawn>.RowGroup(
+                "<b>" + "EdB.PC.AddParentChild.Header.SelectWorldPawn".Translate() + "</b>",
                 PrepareCarefully.Instance.RelationshipManager.AvailableWorldPawns.Concat(hiddenPawnsForSource)));
-            WidgetTable<CustomPawn>.RowGroup sourceNewPawnGroup = new WidgetTable<CustomPawn>.RowGroup("EdB.PC.AddParentChild.Header.CreateTemporaryPawn".Translate(),
+            WidgetTable<CustomPawn>.RowGroup sourceNewPawnGroup = new WidgetTable<CustomPawn>.RowGroup(
+                "EdB.PC.AddParentChild.Header.CreateTemporaryPawn".Translate(),
                 PrepareCarefully.Instance.RelationshipManager.AvailableTemporaryPawns);
             sourceRowGroups.Add(sourceNewPawnGroup);
 
@@ -335,8 +372,10 @@ namespace EdB.PrepareCarefully {
                     int index = sourceNewPawnGroup.Rows.FirstIndexOf((CustomPawn p) => {
                         return p == targetParentChildPawn;
                     });
-                    if (index > -1 && index < PrepareCarefully.Instance.RelationshipManager.AvailableTemporaryPawns.Count()) {
-                        targetParentChildPawn = PrepareCarefully.Instance.RelationshipManager.ReplaceNewTemporaryCharacter(index);
+                    if (index > -1 &&
+                        index < PrepareCarefully.Instance.RelationshipManager.AvailableTemporaryPawns.Count()) {
+                        targetParentChildPawn =
+                            PrepareCarefully.Instance.RelationshipManager.ReplaceNewTemporaryCharacter(index);
                     }
                 }
             };
@@ -359,11 +398,13 @@ namespace EdB.PrepareCarefully {
             WidgetTable<CustomPawn>.RowGroup targetNewPawnGroup = null;
 
             sourcePawnDialog.CloseAction = () => {
-                List<PawnRelationDef> relationDefs = PrepareCarefully.Instance.RelationshipManager.AllowedRelationships.Select((PawnRelationDef def) => {
-                    return def;
-                }).ToList();
+                List<PawnRelationDef> relationDefs = PrepareCarefully.Instance.RelationshipManager.AllowedRelationships
+                    .Select((PawnRelationDef def) => {
+                        return def;
+                    }).ToList();
                 relationDefs.Sort((PawnRelationDef a, PawnRelationDef b) => {
-                    return a.GetGenderSpecificLabelCap(sourceParentChildPawn.Pawn).CompareTo(b.GetGenderSpecificLabelCap(sourceParentChildPawn.Pawn));
+                    return a.GetGenderSpecificLabelCap(sourceParentChildPawn.Pawn)
+                        .CompareTo(b.GetGenderSpecificLabelCap(sourceParentChildPawn.Pawn));
                 });
                 relationshipDialog.Options = relationDefs;
                 Find.WindowStack.Add(relationshipDialog);
@@ -373,9 +414,12 @@ namespace EdB.PrepareCarefully {
                 targetPawnDialog.DisabledPawns = disabledTargets;
 
                 List<WidgetTable<CustomPawn>.RowGroup> targetRowGroups = new List<WidgetTable<CustomPawn>.RowGroup>();
-                targetRowGroups.Add(new WidgetTable<CustomPawn>.RowGroup("EdB.PC.AddParentChild.Header.SelectColonist".Translate(),
-                    PrepareCarefully.Instance.RelationshipManager.AvailableColonyPawns.Where(pawn => pawn != sourceParentChildPawn)));
-                List<CustomPawn> hiddenPawnsForTarget = PrepareCarefully.Instance.RelationshipManager.AvailableHiddenPawns.ToList();
+                targetRowGroups.Add(new WidgetTable<CustomPawn>.RowGroup(
+                    "EdB.PC.AddParentChild.Header.SelectColonist".Translate(),
+                    PrepareCarefully.Instance.RelationshipManager.AvailableColonyPawns.Where(pawn =>
+                        pawn != sourceParentChildPawn)));
+                List<CustomPawn> hiddenPawnsForTarget =
+                    PrepareCarefully.Instance.RelationshipManager.AvailableHiddenPawns.ToList();
                 hiddenPawnsForTarget.Sort((a, b) => {
                     if (a.Type != b.Type) {
                         return a.Type == CustomPawnType.Hidden ? -1 : 1;
@@ -386,9 +430,12 @@ namespace EdB.PrepareCarefully {
                         return aInt.CompareTo(bInt);
                     }
                 });
-                targetRowGroups.Add(new WidgetTable<CustomPawn>.RowGroup("<b>" + "EdB.PC.AddParentChild.Header.SelectWorldPawn".Translate() + "</b>",
-                    PrepareCarefully.Instance.RelationshipManager.AvailableWorldPawns.Where(pawn => pawn != sourceParentChildPawn).Concat(hiddenPawnsForTarget)));
-                targetNewPawnGroup = new WidgetTable<CustomPawn>.RowGroup("EdB.PC.AddParentChild.Header.CreateTemporaryPawn".Translate(),
+                targetRowGroups.Add(new WidgetTable<CustomPawn>.RowGroup(
+                    "<b>" + "EdB.PC.AddParentChild.Header.SelectWorldPawn".Translate() + "</b>",
+                    PrepareCarefully.Instance.RelationshipManager.AvailableWorldPawns
+                        .Where(pawn => pawn != sourceParentChildPawn).Concat(hiddenPawnsForTarget)));
+                targetNewPawnGroup = new WidgetTable<CustomPawn>.RowGroup(
+                    "EdB.PC.AddParentChild.Header.CreateTemporaryPawn".Translate(),
                     PrepareCarefully.Instance.RelationshipManager.AvailableTemporaryPawns);
                 targetRowGroups.Add(targetNewPawnGroup);
                 targetPawnDialog.RowGroups = targetRowGroups;
@@ -400,22 +447,29 @@ namespace EdB.PrepareCarefully {
                 int index = targetNewPawnGroup.Rows.FirstIndexOf((CustomPawn p) => {
                     return p == targetParentChildPawn;
                 });
-                if (index > -1 && index < PrepareCarefully.Instance.RelationshipManager.AvailableTemporaryPawns.Count()) {
-                    targetParentChildPawn = PrepareCarefully.Instance.RelationshipManager.ReplaceNewTemporaryCharacter(index);
+                if (index > -1 &&
+                    index < PrepareCarefully.Instance.RelationshipManager.AvailableTemporaryPawns.Count()) {
+                    targetParentChildPawn =
+                        PrepareCarefully.Instance.RelationshipManager.ReplaceNewTemporaryCharacter(index);
                 }
-                this.RelationshipAdded(PrepareCarefully.Instance.RelationshipManager.FindInverseRelationship(selectedRelationship), sourceParentChildPawn, targetParentChildPawn);
+
+                this.RelationshipAdded(
+                    PrepareCarefully.Instance.RelationshipManager.FindInverseRelationship(selectedRelationship),
+                    sourceParentChildPawn, targetParentChildPawn);
             };
             Find.WindowStack.Add(sourcePawnDialog);
         }
-        
+
         public void SetDisabledTargets(CustomPawn source, PawnRelationDef relationDef) {
             disabledTargets.Clear();
-            CarefullyPawnRelationDef extendedDef = DefDatabase<CarefullyPawnRelationDef>.GetNamedSilentFail(relationDef.defName);
+            CarefullyPawnRelationDef extendedDef =
+                DefDatabase<CarefullyPawnRelationDef>.GetNamedSilentFail(relationDef.defName);
             foreach (var pawn in PrepareCarefully.Instance.RelationshipManager.ColonyAndWorldPawnsForRelationships) {
                 if (source == pawn) {
                     disabledTargets.Add(pawn);
                     continue;
                 }
+
                 bool bloodRelation = relationDef.familyByBloodRelation;
                 foreach (CustomRelationship r in PrepareCarefully.Instance.RelationshipManager.Relationships) {
                     if (r.source == source && r.target == pawn) {
@@ -423,11 +477,13 @@ namespace EdB.PrepareCarefully {
                             disabledTargets.Add(pawn);
                             break;
                         }
-                        else if (extendedDef != null && extendedDef.conflicts != null && extendedDef.conflicts.Contains(r.def.defName)) {
+                        else if (extendedDef != null && extendedDef.conflicts != null &&
+                                 extendedDef.conflicts.Contains(r.def.defName)) {
                             disabledTargets.Add(pawn);
                             break;
                         }
-                        else if (extendedDef != null && extendedDef.conflicts != null && extendedDef.conflicts.Contains(r.inverseDef.defName)) {
+                        else if (extendedDef != null && extendedDef.conflicts != null &&
+                                 extendedDef.conflicts.Contains(r.inverseDef.defName)) {
                             disabledTargets.Add(pawn);
                             break;
                         }
@@ -437,11 +493,13 @@ namespace EdB.PrepareCarefully {
                             disabledTargets.Add(pawn);
                             break;
                         }
-                        else if (extendedDef != null && extendedDef.conflicts != null && extendedDef.conflicts.Contains(r.inverseDef.defName)) {
+                        else if (extendedDef != null && extendedDef.conflicts != null &&
+                                 extendedDef.conflicts.Contains(r.inverseDef.defName)) {
                             disabledTargets.Add(pawn);
                             break;
                         }
-                        else if (extendedDef != null && extendedDef.conflicts != null && extendedDef.conflicts.Contains(r.def.defName)) {
+                        else if (extendedDef != null && extendedDef.conflicts != null &&
+                                 extendedDef.conflicts.Contains(r.def.defName)) {
                             disabledTargets.Add(pawn);
                             break;
                         }

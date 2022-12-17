@@ -1,19 +1,16 @@
-using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.Sound;
 
 namespace EdB.PrepareCarefully {
     public class OptionsHair {
-        protected List<HairDef> maleHairs = new List<HairDef>();
         protected List<HairDef> femaleHairs = new List<HairDef>();
-        protected List<HairDef> noGenderHairs = new List<HairDef>();
         protected List<Color> hairColors = new List<Color>();
+        protected List<HairDef> maleHairs = new List<HairDef>();
+        protected List<HairDef> noGenderHairs = new List<HairDef>();
+
         public List<HairDef> MaleHairs {
             get {
                 return maleHairs;
@@ -22,6 +19,7 @@ namespace EdB.PrepareCarefully {
                 maleHairs = value;
             }
         }
+
         public List<HairDef> FemaleHairs {
             get {
                 return femaleHairs;
@@ -30,6 +28,7 @@ namespace EdB.PrepareCarefully {
                 femaleHairs = value;
             }
         }
+
         public List<HairDef> NoGenderHairs {
             get {
                 return noGenderHairs;
@@ -38,6 +37,16 @@ namespace EdB.PrepareCarefully {
                 noGenderHairs = value;
             }
         }
+
+        public List<Color> Colors {
+            get {
+                return hairColors;
+            }
+            set {
+                hairColors = value;
+            }
+        }
+
         public void AddHair(HairDef def) {
             if (def.styleGender == StyleGender.Male) {
                 maleHairs.Add(def);
@@ -51,6 +60,7 @@ namespace EdB.PrepareCarefully {
                 noGenderHairs.Add(def);
             }
         }
+
         public List<HairDef> GetHairs(Gender gender) {
             if (gender == Gender.Male) {
                 return maleHairs;
@@ -62,14 +72,7 @@ namespace EdB.PrepareCarefully {
                 return noGenderHairs;
             }
         }
-        public List<Color> Colors {
-            get {
-                return hairColors;
-            }
-            set {
-                hairColors = value;
-            }
-        }
+
         public void Sort() {
             Comparison<HairDef> sorter = (HairDef x, HairDef y) => {
                 if (x.label == null) {

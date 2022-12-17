@@ -1,40 +1,37 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Verse;
-namespace EdB.PrepareCarefully {
-    public class TabViewRelationships : TabViewBase {
-        public TabViewRelationships() {
-            PanelRelationshipsParentChild = new PanelRelationshipsParentChild();
-            PanelRelationshipsOther = new PanelRelationshipsOther();
-        }
-        
-        public PanelRelationshipsParentChild PanelRelationshipsParentChild { get; set; }
-        public PanelRelationshipsOther PanelRelationshipsOther { get; set; }
 
-        public override string Name {
-            get {
-                return "EdB.PC.TabView.Relationships.Title".Translate();
-            }
-        }
+namespace EdB.PrepareCarefully;
 
-        protected override void Resize(Rect rect) {
-            base.Resize(rect);
+public class TabViewRelationships : TabViewBase {
+    public TabViewRelationships() {
+        PanelRelationshipsParentChild = new PanelRelationshipsParentChild();
+        PanelRelationshipsOther = new PanelRelationshipsOther();
+    }
 
-            Vector2 panelMargin = Style.SizePanelMargin;
+    public PanelRelationshipsParentChild PanelRelationshipsParentChild { get; set; }
+    public PanelRelationshipsOther PanelRelationshipsOther { get; set; }
 
-            Rect parentChildRect = new Rect(rect.x, rect.y, rect.width, 316);
-            Rect otherRect = new Rect(rect.x, rect.y + parentChildRect.height + panelMargin.y, rect.width, rect.height - parentChildRect.height - panelMargin.y);
+    public override string Name => "EdB.PC.TabView.Relationships.Title".Translate();
 
-            PanelRelationshipsParentChild.Resize(parentChildRect);
-            PanelRelationshipsOther.Resize(otherRect);
-        }
+    protected override void Resize(Rect rect) {
+        base.Resize(rect);
 
-        public override void Draw(State state, Rect rect) {
-            base.Draw(state, rect);
+        var panelMargin = Style.SizePanelMargin;
 
-            // Draw the panels.
-            PanelRelationshipsParentChild.Draw(state);
-            PanelRelationshipsOther.Draw(state);
-        }
+        var parentChildRect = new Rect(rect.x, rect.y, rect.width, 316);
+        var otherRect = new Rect(rect.x, rect.y + parentChildRect.height + panelMargin.y, rect.width,
+            rect.height - parentChildRect.height - panelMargin.y);
+
+        PanelRelationshipsParentChild.Resize(parentChildRect);
+        PanelRelationshipsOther.Resize(otherRect);
+    }
+
+    public override void Draw(State state, Rect rect) {
+        base.Draw(state, rect);
+
+        // Draw the panels.
+        PanelRelationshipsParentChild.Draw(state);
+        PanelRelationshipsOther.Draw(state);
     }
 }

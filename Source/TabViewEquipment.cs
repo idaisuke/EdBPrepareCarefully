@@ -1,44 +1,38 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Verse;
-namespace EdB.PrepareCarefully {
-    public class TabViewEquipment : TabViewBase {
 
-        public PanelEquipmentAvailable PanelAvailable { get; set; }
-        public PanelEquipmentSelected PanelSelected { get; set; }
+namespace EdB.PrepareCarefully;
 
-        public TabViewEquipment() {
-            PanelAvailable = new PanelEquipmentAvailable();
-            PanelSelected = new PanelEquipmentSelected();
-        }
+public class TabViewEquipment : TabViewBase {
+    public TabViewEquipment() {
+        PanelAvailable = new PanelEquipmentAvailable();
+        PanelSelected = new PanelEquipmentSelected();
+    }
 
-        public override string Name {
-            get {
-                return "EdB.PC.TabView.Equipment.Title".Translate();
-            }
-        }
+    public PanelEquipmentAvailable PanelAvailable { get; set; }
+    public PanelEquipmentSelected PanelSelected { get; set; }
 
-        protected override void Resize(Rect rect) {
-            base.Resize(rect);
+    public override string Name => "EdB.PC.TabView.Equipment.Title".Translate();
 
-            Vector2 panelMargin = Style.SizePanelMargin;
+    protected override void Resize(Rect rect) {
+        base.Resize(rect);
 
-            float availableWidth = rect.width - panelMargin.x;
-            float availableHeight = rect.height;
-            float panelWidth = Mathf.Floor(availableWidth / 2);
+        var panelMargin = Style.SizePanelMargin;
 
-            PanelAvailable.Resize(new Rect(rect.x, rect.y, panelWidth, availableHeight));
-            PanelSelected.Resize(new Rect(PanelAvailable.PanelRect.xMax + panelMargin.x, rect.y,
-                panelWidth, availableHeight));
-        }
+        var availableWidth = rect.width - panelMargin.x;
+        var availableHeight = rect.height;
+        var panelWidth = Mathf.Floor(availableWidth / 2);
 
-        public override void Draw(State state, Rect rect) {
-            base.Draw(state, rect);
+        PanelAvailable.Resize(new Rect(rect.x, rect.y, panelWidth, availableHeight));
+        PanelSelected.Resize(new Rect(PanelAvailable.PanelRect.xMax + panelMargin.x, rect.y,
+            panelWidth, availableHeight));
+    }
 
-            // Draw the panels.
-            PanelAvailable.Draw(PrepareCarefully.Instance.State);
-            PanelSelected.Draw(PrepareCarefully.Instance.State);
-        }
+    public override void Draw(State state, Rect rect) {
+        base.Draw(state, rect);
 
+        // Draw the panels.
+        PanelAvailable.Draw(PrepareCarefully.Instance.State);
+        PanelSelected.Draw(PrepareCarefully.Instance.State);
     }
 }

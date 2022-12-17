@@ -1,11 +1,36 @@
-using RimWorld;
 using System;
 using System.Collections.Generic;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+
 namespace EdB.PrepareCarefully {
     public class DialogPawnKinds : Window {
+        public string CancelButtonLabel = "EdB.PC.Common.Cancel";
+
+        public string ConfirmButtonLabel = "EdB.PC.Common.Select";
+        protected bool confirmed = false;
+
+        public Func<string> ConfirmValidation = () => {
+            return null;
+        };
+
+        protected string headerLabel;
+        protected LabelTrimmer labelTrimmer = new LabelTrimmer();
+        protected bool resizeDirtyFlag = true;
+        protected PawnKindDef scrollTo = null;
+
+        protected WidgetTable<PawnKindDef> table = new WidgetTable<PawnKindDef>();
+
+        public DialogPawnKinds() {
+            this.closeOnCancel = true;
+            this.doCloseX = true;
+            this.absorbInputAroundWindow = true;
+            this.forcePause = true;
+            Resize();
+        }
+
         public Vector2 ContentMargin { get; protected set; }
         public Vector2 WindowSize { get; protected set; }
         public Vector2 ButtonSize { get; protected set; }
@@ -22,18 +47,6 @@ namespace EdB.PrepareCarefully {
         public Rect CancelButtonRect { get; protected set; }
         public Rect ConfirmButtonRect { get; protected set; }
         public Rect SingleButtonRect { get; protected set; }
-        protected string headerLabel;
-        protected bool resizeDirtyFlag = true;
-        protected bool confirmed = false;
-        protected PawnKindDef scrollTo = null;
-        protected LabelTrimmer labelTrimmer = new LabelTrimmer();
-        public DialogPawnKinds() {
-            this.closeOnCancel = true;
-            this.doCloseX = true;
-            this.absorbInputAroundWindow = true;
-            this.forcePause = true;
-            Resize();
-        }
 
         public PawnKindDef Selected {
             get;
@@ -49,30 +62,44 @@ namespace EdB.PrepareCarefully {
                 MarkResizeFlagDirty();
             }
         }
-        public Func<string> ConfirmValidation = () => {
-            return null;
-        };
+
         public Action CloseAction {
             get;
             set;
         }
+
         public Action<PawnKindDef> SelectAction {
             get;
             set;
         }
+
         public HashSet<PawnKindDef> DisabledOptions {
             get;
             set;
         }
 
-        protected WidgetTable<PawnKindDef> table = new WidgetTable<PawnKindDef>();
+        public IEnumerable<PawnKindDef> PawnKinds {
+            get;
+            set;
+        }
 
-        public string ConfirmButtonLabel = "EdB.PC.Common.Select";
-        public string CancelButtonLabel = "EdB.PC.Common.Cancel";
+        public IEnumerable<WidgetTable<PawnKindDef>.RowGroup> RowGroups {
+            get;
+            set;
+        }
+
+        public bool ShowRace { get; set; }
+
+        public override Vector2 InitialSize {
+            get {
+                return new Vector2(WindowSize.x, WindowSize.y);
+            }
+        }
 
         public void ScrollTo(PawnKindDef kindDef) {
             this.scrollTo = kindDef;
         }
+
         protected void MarkResizeFlagDirty() {
             resizeDirtyFlag = true;
         }
@@ -155,8 +182,10 @@ namespace EdB.PrepareCarefully {
                         Text.Font = GameFont.Small;
                     }
                     else {
-                        Widgets.Label(new Rect(rect.x + nameOffset, rect.y + 1, rect.width, nameSize.y), pawnKind.LabelCap);
+                        Widgets.Label(new Rect(rect.x + nameOffset, rect.y + 1, rect.width, nameSize.y),
+                            pawnKind.LabelCap);
                     }
+
                     Text.Anchor = TextAnchor.UpperLeft;
                 }
             });
@@ -187,30 +216,16 @@ namespace EdB.PrepareCarefully {
             }
         }
 
-        public IEnumerable<PawnKindDef> PawnKinds {
-            get; set;
-        }
-
-        public IEnumerable<WidgetTable<PawnKindDef>.RowGroup> RowGroups {
-            get; set;
-        }
-
-        public bool ShowRace { get; set; }
-
-        public override Vector2 InitialSize {
-            get {
-                return new Vector2(WindowSize.x, WindowSize.y);
-            }
-        }
-
         public override void DoWindowContents(Rect inRect) {
             if (resizeDirtyFlag) {
                 Resize();
             }
+
             if (scrollTo != null) {
                 table.ScrollTo(scrollTo);
                 scrollTo = null;
             }
+
             GUI.color = Color.white;
             Text.Font = GameFont.Medium;
             if (HeaderLabel != null) {
@@ -240,8 +255,10 @@ namespace EdB.PrepareCarefully {
                     if (Widgets.ButtonText(CancelButtonRect, CancelButtonLabel.Translate(), true, true, true)) {
                         this.Close(true);
                     }
+
                     buttonRect = ConfirmButtonRect;
                 }
+
                 if (Widgets.ButtonText(buttonRect, ConfirmButtonLabel.Translate(), true, true, true)) {
                     string validationMessage = ConfirmValidation();
                     if (validationMessage != null) {
@@ -276,4 +293,3 @@ namespace EdB.PrepareCarefully {
         }
     }
 }
-

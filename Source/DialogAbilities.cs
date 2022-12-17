@@ -1,20 +1,40 @@
-using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
 namespace EdB.PrepareCarefully {
     public class DialogAbilities : Window {
-        public class Option {
-            public AbilityDef Value { get; set; }
-            public bool Selected { get; set; }
-            public bool Disabled { get; set; }
-        }
-        public string ConfirmButtonLabel = "EdB.PC.Dialog.Implant.Button.Confirm";
         public string CancelButtonLabel = "EdB.PC.Common.Cancel";
+        public string ConfirmButtonLabel = "EdB.PC.Dialog.Implant.Button.Confirm";
+        protected bool confirmed = false;
+
+        public Func<string> ConfirmValidation = () => {
+            return null;
+        };
+
+        protected bool disabledOptionsDirtyFlag = false;
+        public Color DottedLineColor = new Color(60f / 255f, 64f / 255f, 67f / 255f);
+        public Vector2 DottedLineSize = new Vector2(342, 2);
+        protected string headerLabel;
+        protected List<Option> options = new List<Option>();
+        protected CustomPawn pawn = null;
+        protected bool resizeDirtyFlag = true;
+
+        protected WidgetTable<Option> table;
+
+        public DialogAbilities(CustomPawn pawn) {
+            this.closeOnCancel = true;
+            this.doCloseX = true;
+            this.absorbInputAroundWindow = true;
+            this.forcePause = true;
+            InitializeWithPawn(pawn);
+            Resize();
+        }
+
         public Vector2 ContentMargin { get; protected set; }
         public Vector2 WindowSize { get; protected set; }
         public Vector2 ButtonSize { get; protected set; }
@@ -31,43 +51,6 @@ namespace EdB.PrepareCarefully {
         public Rect CancelButtonRect { get; protected set; }
         public Rect ConfirmButtonRect { get; protected set; }
         public Rect SingleButtonRect { get; protected set; }
-        public Color DottedLineColor = new Color(60f / 255f, 64f / 255f, 67f / 255f);
-        public Vector2 DottedLineSize = new Vector2(342, 2);
-        protected string headerLabel;
-        protected bool resizeDirtyFlag = true;
-        protected bool confirmed = false;
-
-        protected WidgetTable<Option> table;
-        protected List<Option> options = new List<Option>();
-        protected CustomPawn pawn = null;
-        protected bool disabledOptionsDirtyFlag = false;
-
-        public DialogAbilities(CustomPawn pawn) {
-            this.closeOnCancel = true;
-            this.doCloseX = true;
-            this.absorbInputAroundWindow = true;
-            this.forcePause = true;
-            InitializeWithPawn(pawn);
-            Resize();
-        }
-
-        protected void InitializeWithPawn(CustomPawn pawn) {
-            this.pawn = pawn;
-            InitializeOptions();
-        }
-
-        protected void InitializeOptions() {
-            options.Clear();
-            HashSet<AbilityDef> selected = new HashSet<AbilityDef>();
-            selected.AddRange(pawn.Pawn.abilities.abilities.Select(a => a.def));
-            foreach (var option in DefDatabase<AbilityDef>.AllDefs) {
-                options.Add(new Option() {
-                    Value = option,
-                    Selected = selected.Contains(option),
-                    Disabled = false
-                });
-            }
-        }
 
         public string HeaderLabel {
             get {
@@ -95,9 +78,19 @@ namespace EdB.PrepareCarefully {
             }
         }
 
-        public Func<string> ConfirmValidation = () => {
-            return null;
-        };
+        protected void InitializeWithPawn(CustomPawn pawn) {
+            this.pawn = pawn;
+            InitializeOptions();
+        }
+
+        protected void InitializeOptions() {
+            options.Clear();
+            HashSet<AbilityDef> selected = new HashSet<AbilityDef>();
+            selected.AddRange(pawn.Pawn.abilities.abilities.Select(a => a.def));
+            foreach (var option in DefDatabase<AbilityDef>.AllDefs) {
+                options.Add(new Option() { Value = option, Selected = selected.Contains(option), Disabled = false });
+            }
+        }
 
         protected void MarkResizeFlagDirty() {
             resizeDirtyFlag = true;
@@ -107,6 +100,7 @@ namespace EdB.PrepareCarefully {
             if (option.Disabled && !option.Selected) {
                 return;
             }
+
             SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
             option.Selected = !option.Selected;
         }
@@ -180,26 +174,32 @@ namespace EdB.PrepareCarefully {
                     Rect labelRect = new Rect(rect.x, rect.y, rect.width, rect.height);
                     Rect dottedLineRect = new Rect(labelRect.x, labelRect.y + 21, DottedLineSize.x, DottedLineSize.y);
                     Rect checkboxRect = new Rect(labelRect.width - 22 - 6, labelRect.MiddleY() - 12, 22, 22);
-                    Rect clickRect = new Rect(labelRect.x, labelRect.y, labelRect.width - checkboxRect.width, labelRect.height);
+                    Rect clickRect = new Rect(labelRect.x, labelRect.y, labelRect.width - checkboxRect.width,
+                        labelRect.height);
                     GUI.color = DottedLineColor;
                     GUI.DrawTexture(dottedLineRect, Textures.TextureDottedLine);
                     Vector2 labelSize = Text.CalcSize(option.Value.LabelCap);
                     GUI.color = Style.ColorWindowBackground;
-                    GUI.DrawTexture(new Rect(labelRect.x, labelRect.y, labelSize.x + 2, labelRect.height), BaseContent.WhiteTex);
+                    GUI.DrawTexture(new Rect(labelRect.x, labelRect.y, labelSize.x + 2, labelRect.height),
+                        BaseContent.WhiteTex);
                     GUI.DrawTexture(checkboxRect.InsetBy(-2, -2, -40, -2), BaseContent.WhiteTex);
 
-                    TooltipHandler.TipRegion(labelRect, new TipSignal(() => option.Value.GetTooltip(pawn.Pawn), 23467344));
+                    TooltipHandler.TipRegion(labelRect,
+                        new TipSignal(() => option.Value.GetTooltip(pawn.Pawn), 23467344));
                     if (!option.Disabled) {
-                        Style.SetGUIColorForButton(labelRect, option.Selected, Style.ColorText, Style.ColorButtonHighlight, Style.ColorButtonHighlight);
+                        Style.SetGUIColorForButton(labelRect, option.Selected, Style.ColorText,
+                            Style.ColorButtonHighlight, Style.ColorButtonHighlight);
                         Widgets.Label(labelRect, option.Value.LabelCap);
                         if (Widgets.ButtonInvisible(clickRect)) {
                             ClickOptionAction(option);
                         }
+
                         GUI.color = Color.white;
                         Texture2D checkboxTexture = Textures.TextureCheckbox;
                         if (option.Selected) {
                             checkboxTexture = Textures.TextureCheckboxSelected;
                         }
+
                         if (Widgets.ButtonImage(checkboxRect, checkboxTexture)) {
                             ClickOptionAction(option);
                         }
@@ -207,17 +207,19 @@ namespace EdB.PrepareCarefully {
                     else {
                         GUI.color = Style.ColorControlDisabled;
                         Widgets.Label(labelRect, option.Value.LabelCap);
-                        GUI.DrawTexture(checkboxRect, option.Selected ? Textures.TextureCheckboxPartiallySelected : Textures.TextureCheckbox);
+                        GUI.DrawTexture(checkboxRect,
+                            option.Selected ? Textures.TextureCheckboxPartiallySelected : Textures.TextureCheckbox);
                         if (Widgets.ButtonInvisible(checkboxRect)) {
                             ClickOptionAction(option);
                         }
                     }
+
                     Text.Anchor = TextAnchor.UpperLeft;
                 },
                 MeasureAction = (Option option, float width, WidgetTable<Option>.Metadata metadata) => {
                     return LineHeight;
                 },
-                Width = ContentSize.x,
+                Width = ContentSize.x
             });
 
             resizeDirtyFlag = false;
@@ -227,6 +229,7 @@ namespace EdB.PrepareCarefully {
             if (resizeDirtyFlag) {
                 Resize();
             }
+
             GUI.color = Color.white;
             Text.Font = GameFont.Medium;
             if (HeaderLabel != null) {
@@ -252,8 +255,10 @@ namespace EdB.PrepareCarefully {
                     if (Widgets.ButtonText(CancelButtonRect, CancelButtonLabel.Translate(), true, true, true)) {
                         this.Close(true);
                     }
+
                     buttonRect = ConfirmButtonRect;
                 }
+
                 if (Widgets.ButtonText(buttonRect, ConfirmButtonLabel.Translate(), true, true, true)) {
                     string validationMessage = ConfirmValidation();
                     if (validationMessage != null) {
@@ -285,6 +290,12 @@ namespace EdB.PrepareCarefully {
                     CloseAction(options.Where(o => o.Selected).Select(o => o.Value));
                 }
             }
+        }
+
+        public class Option {
+            public AbilityDef Value { get; set; }
+            public bool Selected { get; set; }
+            public bool Disabled { get; set; }
         }
     }
 }

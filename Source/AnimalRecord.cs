@@ -1,40 +1,35 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Verse;
+﻿using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class AnimalRecord {
-        public ThingDef ThingDef;
-        public Gender Gender;
-        public double Cost = 0;
-        public string label;
-        public Thing Thing;
-        public AnimalRecord() {
-        }
-        public AnimalRecord(ThingDef thingDef, Gender gender) {
-            this.ThingDef = thingDef;
-            this.Gender = gender;
-        }
-        public AnimalRecordKey Key {
-            get {
-                return new AnimalRecordKey(ThingDef, Gender);
+namespace EdB.PrepareCarefully;
+
+public class AnimalRecord {
+    public double Cost = 0;
+    public Gender Gender;
+    public string label;
+    public Thing Thing;
+    public ThingDef ThingDef;
+
+    public AnimalRecord() {
+    }
+
+    public AnimalRecord(ThingDef thingDef, Gender gender) {
+        ThingDef = thingDef;
+        Gender = gender;
+    }
+
+    public AnimalRecordKey Key => new(ThingDef, Gender);
+
+    public string Label {
+        get {
+            if (label != null) {
+                return label;
             }
-        }
-        public string Label {
-            get {
-                if (label != null) {
-                    return label;
-                }
-                if (Gender == Gender.None) {
-                    return "EdB.PC.Animals.LabelWithoutGender".Translate(ThingDef.LabelCap);
-                }
-                else {
-                    return "EdB.PC.Animals.LabelWithGender".Translate(ThingDef.LabelCap, Gender.GetLabel());
-                }
+
+            if (Gender == Gender.None) {
+                return "EdB.PC.Animals.LabelWithoutGender".Translate(ThingDef.LabelCap);
             }
+
+            return "EdB.PC.Animals.LabelWithGender".Translate(ThingDef.LabelCap, Gender.GetLabel());
         }
     }
 }

@@ -1,11 +1,35 @@
-﻿using RimWorld;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+
 namespace EdB.PrepareCarefully {
     public class DialogFactions : Window {
+        public string CancelButtonLabel = "EdB.PC.Common.Cancel";
+
+        public string ConfirmButtonLabel = "EdB.PC.Common.Select";
+        protected bool confirmed = false;
+
+        public Func<string> ConfirmValidation = () => {
+            return null;
+        };
+
+        protected string headerLabel;
+        protected bool resizeDirtyFlag = true;
+        protected CustomFaction scrollTo = null;
+
+        protected WidgetTable<CustomFaction> table = new WidgetTable<CustomFaction>();
+
+        public DialogFactions() {
+            this.closeOnCancel = true;
+            this.doCloseX = true;
+            this.absorbInputAroundWindow = true;
+            this.forcePause = true;
+            Resize();
+        }
+
         public Vector2 ContentMargin { get; protected set; }
         public Vector2 WindowSize { get; protected set; }
         public Vector2 ButtonSize { get; protected set; }
@@ -22,18 +46,6 @@ namespace EdB.PrepareCarefully {
         public Rect CancelButtonRect { get; protected set; }
         public Rect ConfirmButtonRect { get; protected set; }
         public Rect SingleButtonRect { get; protected set; }
-        protected string headerLabel;
-        protected bool resizeDirtyFlag = true;
-        protected bool confirmed = false;
-        protected CustomFaction scrollTo = null;
-
-        public DialogFactions() {
-            this.closeOnCancel = true;
-            this.doCloseX = true;
-            this.absorbInputAroundWindow = true;
-            this.forcePause = true;
-            Resize();
-        }
 
         public CustomFaction SelectedFaction {
             get;
@@ -49,30 +61,41 @@ namespace EdB.PrepareCarefully {
                 MarkResizeFlagDirty();
             }
         }
-        public Func<string> ConfirmValidation = () => {
-            return null;
-        };
+
         public Action CloseAction {
             get;
             set;
         }
+
         public Action<CustomFaction> SelectAction {
             get;
             set;
         }
+
         public HashSet<CustomFaction> DisabledFactions {
             get;
             set;
         }
 
+        public IEnumerable<CustomFaction> Pawns {
+            get;
+            set;
+        }
+
+        public IEnumerable<WidgetTable<CustomFaction>.RowGroup> RowGroups {
+            get;
+            set;
+        }
+
+        public override Vector2 InitialSize {
+            get {
+                return new Vector2(WindowSize.x, WindowSize.y);
+            }
+        }
+
         public void ScrollTo(CustomFaction customFaction) {
             scrollTo = customFaction;
         }
-
-        protected WidgetTable<CustomFaction> table = new WidgetTable<CustomFaction>();
-
-        public string ConfirmButtonLabel = "EdB.PC.Common.Select";
-        public string CancelButtonLabel = "EdB.PC.Common.Cancel";
 
         protected void MarkResizeFlagDirty() {
             resizeDirtyFlag = true;
@@ -117,7 +140,7 @@ namespace EdB.PrepareCarefully {
             ConfirmButtonRect = new Rect(ContentSize.x - ButtonSize.x,
                 (FooterHeight / 2) - (ButtonSize.y / 2),
                 ButtonSize.x, ButtonSize.y);
-            
+
             float nameOffset = 16;
             float radioWidth = 36;
             Vector2 nameSize = new Vector2(ContentRect.width - radioWidth, 42);
@@ -145,19 +168,24 @@ namespace EdB.PrepareCarefully {
                     if (faction.Faction != null && faction.Faction.Name.ToLower() != faction.Def.label.ToLower()) {
                         description = faction.Def.LabelCap;
                     }
+
                     if (description == null) {
                         Text.Anchor = TextAnchor.MiddleLeft;
                         Text.Font = GameFont.Small;
-                        Widgets.Label(new Rect(rect.x + nameOffset, rect.y + 1, rect.width, nameSize.y), faction.Name.CapitalizeFirst());
+                        Widgets.Label(new Rect(rect.x + nameOffset, rect.y + 1, rect.width, nameSize.y),
+                            faction.Name.CapitalizeFirst());
                         Text.Anchor = TextAnchor.UpperLeft;
                     }
                     else {
                         Text.Anchor = TextAnchor.LowerLeft;
                         Text.Font = GameFont.Small;
-                        Widgets.Label(new Rect(rect.x + nameOffset, rect.y + 5, rect.width, nameSize.y * 0.5f), faction.Name.CapitalizeFirst());
+                        Widgets.Label(new Rect(rect.x + nameOffset, rect.y + 5, rect.width, nameSize.y * 0.5f),
+                            faction.Name.CapitalizeFirst());
                         Text.Anchor = TextAnchor.UpperLeft;
                         Text.Font = GameFont.Tiny;
-                        Widgets.Label(new Rect(rect.x + nameOffset, rect.y + nameSize.y * 0.5f - 1, rect.width, nameSize.y * 0.5f), description);
+                        Widgets.Label(
+                            new Rect(rect.x + nameOffset, rect.y + nameSize.y * 0.5f - 1, rect.width,
+                                nameSize.y * 0.5f), description);
                         Text.Font = GameFont.Small;
                         Text.Anchor = TextAnchor.UpperLeft;
                     }
@@ -174,7 +202,8 @@ namespace EdB.PrepareCarefully {
                         GUI.color = Color.white;
                     }
                     else {
-                        if (Widgets.RadioButton(new Vector2(rect.x, rect.MiddleY() - 12), this.SelectedFaction == faction)) {
+                        if (Widgets.RadioButton(new Vector2(rect.x, rect.MiddleY() - 12),
+                                this.SelectedFaction == faction)) {
                             Select(faction);
                         }
                     }
@@ -187,20 +216,6 @@ namespace EdB.PrepareCarefully {
             this.SelectedFaction = faction;
             if (SelectAction != null) {
                 SelectAction(faction);
-            }
-        }
-
-        public IEnumerable<CustomFaction> Pawns {
-            get; set;
-        }
-
-        public IEnumerable<WidgetTable<CustomFaction>.RowGroup> RowGroups {
-            get; set;
-        }
-
-        public override Vector2 InitialSize {
-            get {
-                return new Vector2(WindowSize.x, WindowSize.y);
             }
         }
 
@@ -243,8 +258,10 @@ namespace EdB.PrepareCarefully {
                     if (Widgets.ButtonText(CancelButtonRect, CancelButtonLabel.Translate(), true, true, true)) {
                         this.Close(true);
                     }
+
                     buttonRect = ConfirmButtonRect;
                 }
+
                 if (Widgets.ButtonText(buttonRect, ConfirmButtonLabel.Translate(), true, true, true)) {
                     string validationMessage = ConfirmValidation();
                     if (validationMessage != null) {
@@ -279,4 +296,3 @@ namespace EdB.PrepareCarefully {
         }
     }
 }
-

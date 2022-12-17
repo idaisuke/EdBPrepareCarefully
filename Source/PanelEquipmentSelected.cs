@@ -1,8 +1,6 @@
-using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -10,21 +8,37 @@ using Verse.Sound;
 namespace EdB.PrepareCarefully {
     public class PanelEquipmentSelected : PanelBase {
         public delegate void RemoveEquipmentHandler(EquipmentSelection entry);
+
         public delegate void UpdateEquipmentCountHandler(EquipmentSelection equipment, int count);
-
-        public event RemoveEquipmentHandler EquipmentRemoved;
-        public event UpdateEquipmentCountHandler EquipmentCountUpdated;
-
-        protected Rect RectRemoveButton;
-        protected Rect RectRow;
-        protected WidgetTable<EquipmentSelection> table;
-        private DragSlider Slider = new DragSlider(0.3f, 12, 400);
-        private EquipmentRecord ScrollToEntry = null;
 
         private List<WidgetNumberField> numberFields = new List<WidgetNumberField>();
 
+        protected Rect RectRemoveButton;
+        protected Rect RectRow;
+        private EquipmentRecord ScrollToEntry = null;
+        private DragSlider Slider = new DragSlider(0.3f, 12, 400);
+        protected WidgetTable<EquipmentSelection> table;
+
         public PanelEquipmentSelected() {
         }
+
+        // Goes through all selected equipment entries and tries to make sure that they each have a non-null equipment record.
+        // Not sure that this is still necessary.  See FindEntry() below--don't remember why we needed that method.
+        protected IEnumerable<EquipmentSelection> SelectedEquipment {
+            get {
+                IEnumerable<EquipmentSelection> entries = PrepareCarefully.Instance.Equipment;
+                foreach (var e in entries) {
+                    if (e.record == null) {
+                        e.record = PrepareCarefully.Instance.EquipmentDatabase.LookupEquipmentRecord(e.Key);
+                    }
+                }
+
+                return entries;
+            }
+        }
+
+        public event RemoveEquipmentHandler EquipmentRemoved;
+        public event UpdateEquipmentCountHandler EquipmentCountUpdated;
 
         public override void Resize(Rect rect) {
             base.Resize(rect);
@@ -74,8 +88,10 @@ namespace EdB.PrepareCarefully {
             table.AddColumn(new WidgetTable<EquipmentSelection>.Column() {
                 Width = columnWidthInfo,
                 Name = "Info",
-                DrawAction = (EquipmentSelection entry, Rect columnRect, WidgetTable<EquipmentSelection>.Metadata metadata) => {
-                    Rect infoRect = new Rect(columnRect.MiddleX() - sizeInfoButton.HalfX(), columnRect.MiddleY() - sizeInfoButton.HalfY(), sizeInfoButton.x, sizeInfoButton.y);
+                DrawAction = (EquipmentSelection entry, Rect columnRect,
+                    WidgetTable<EquipmentSelection>.Metadata metadata) => {
+                    Rect infoRect = new Rect(columnRect.MiddleX() - sizeInfoButton.HalfX(),
+                        columnRect.MiddleY() - sizeInfoButton.HalfY(), sizeInfoButton.x, sizeInfoButton.y);
                     Style.SetGUIColorForButton(infoRect);
                     GUI.DrawTexture(infoRect, Textures.TextureButtonInfo);
                     if (Widgets.ButtonInvisible(infoRect)) {
@@ -89,13 +105,15 @@ namespace EdB.PrepareCarefully {
                             Find.WindowStack.Add((Window)new Dialog_InfoCard(entry.ThingDef));
                         }
                     }
+
                     GUI.color = Color.white;
                 }
             });
             table.AddColumn(new WidgetTable<EquipmentSelection>.Column() {
                 Width = columnWidthIcon,
                 Name = "Icon",
-                DrawAction = (EquipmentSelection entry, Rect columnRect, WidgetTable<EquipmentSelection>.Metadata metadata) => {
+                DrawAction = (EquipmentSelection entry, Rect columnRect,
+                    WidgetTable<EquipmentSelection>.Metadata metadata) => {
                     WidgetEquipmentIcon.Draw(columnRect, entry.Record);
                 }
             });
@@ -103,7 +121,8 @@ namespace EdB.PrepareCarefully {
                 Width = columnWidthName,
                 Name = "Name",
                 Label = "Name",
-                DrawAction = (EquipmentSelection entry, Rect columnRect, WidgetTable<EquipmentSelection>.Metadata metadata) => {
+                DrawAction = (EquipmentSelection entry, Rect columnRect,
+                    WidgetTable<EquipmentSelection>.Metadata metadata) => {
                     columnRect = columnRect.InsetBy(nameOffset.x, 0, 0, 0);
                     GUI.color = Style.ColorText;
                     Text.Font = GameFont.Small;
@@ -118,15 +137,15 @@ namespace EdB.PrepareCarefully {
                 Name = "Count",
                 Label = "Count",
                 AdjustForScrollbars = true,
-                DrawAction = (EquipmentSelection entry, Rect columnRect, WidgetTable<EquipmentSelection>.Metadata metadata) => {
+                DrawAction = (EquipmentSelection entry, Rect columnRect,
+                    WidgetTable<EquipmentSelection>.Metadata metadata) => {
                     Rect fieldRect = new Rect(columnRect.x + 17, columnRect.y + 7, 60, 28);
                     Widgets.DrawAtlas(fieldRect, Textures.TextureFieldAtlas);
 
                     if (metadata.rowIndex >= numberFields.Count) {
-                        numberFields.Add(new WidgetNumberField() {
-                            MaxValue = 100000
-                        });
+                        numberFields.Add(new WidgetNumberField() { MaxValue = 100000 });
                     }
+
                     WidgetNumberField field = numberFields[metadata.rowIndex];
                     field.UpdateAction = (int value) => {
                         EquipmentCountUpdated(entry, value);
@@ -152,24 +171,11 @@ namespace EdB.PrepareCarefully {
                 ScrollToEntry = null;
             }
 
-            if (Widgets.ButtonText(RectRemoveButton, "EdB.PC.Panel.SelectedEquipment.Remove".Translate(), true, false, table.Selected != null)) {
+            if (Widgets.ButtonText(RectRemoveButton, "EdB.PC.Panel.SelectedEquipment.Remove".Translate(), true, false,
+                    table.Selected != null)) {
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
                 EquipmentRemoved(table.Selected);
                 table.Selected = null;
-            }
-        }
-
-        // Goes through all selected equipment entries and tries to make sure that they each have a non-null equipment record.
-        // Not sure that this is still necessary.  See FindEntry() below--don't remember why we needed that method.
-        protected IEnumerable<EquipmentSelection> SelectedEquipment {
-            get {
-                IEnumerable<EquipmentSelection> entries = PrepareCarefully.Instance.Equipment;
-                foreach (var e in entries) {
-                    if (e.record == null) {
-                        e.record = PrepareCarefully.Instance.EquipmentDatabase.LookupEquipmentRecord(e.Key);
-                    }
-                }
-                return entries;
             }
         }
 
@@ -188,11 +194,13 @@ namespace EdB.PrepareCarefully {
                 float pos = (float)index * RectRow.height;
                 if (rowTop < min) {
                     float amount = min - rowTop;
-                    table.ScrollView.Position = new Vector2(table.ScrollView.Position.x, table.ScrollView.Position.y - amount);
+                    table.ScrollView.Position =
+                        new Vector2(table.ScrollView.Position.x, table.ScrollView.Position.y - amount);
                 }
                 else if (rowBottom > max) {
                     float amount = rowBottom - max;
-                    table.ScrollView.Position = new Vector2(table.ScrollView.Position.x, table.ScrollView.Position.y + amount);
+                    table.ScrollView.Position =
+                        new Vector2(table.ScrollView.Position.x, table.ScrollView.Position.y + amount);
                 }
             }
         }
@@ -222,5 +230,4 @@ namespace EdB.PrepareCarefully {
             }
         }
     }
-
 }

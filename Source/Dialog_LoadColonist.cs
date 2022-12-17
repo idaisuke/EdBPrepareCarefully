@@ -1,21 +1,18 @@
-﻿using RimWorld;
-using System;
-using UnityEngine;
+﻿using System;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class Dialog_LoadColonist : Dialog_Colonist {
-        protected Action<string> action;
+namespace EdB.PrepareCarefully;
 
-        public Dialog_LoadColonist(Action<string> action) {
-            this.action = action;
-            this.interactButLabel = "EdB.PC.Dialog.PawnPreset.Button.Load".Translate();
-        }
+public class Dialog_LoadColonist : Dialog_Colonist {
+    protected Action<string> action;
 
-        protected override void DoMapEntryInteraction(string colonistName) {
-            action(colonistName);
-            Close(true);
-        }
+    public Dialog_LoadColonist(Action<string> action) {
+        this.action = action;
+        interactButLabel = "EdB.PC.Dialog.PawnPreset.Button.Load".Translate();
+    }
+
+    protected override void DoMapEntryInteraction(string colonistName) {
+        action(colonistName);
+        Close();
     }
 }
-

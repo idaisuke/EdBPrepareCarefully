@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿namespace EdB.PrepareCarefully;
 
-namespace EdB.PrepareCarefully {
-    public enum PawnListMode {
-        ColonyPawnsMaximized,
-        WorldPawnsMaximized
-    }
+public enum PawnListMode {
+    ColonyPawnsMaximized,
+    WorldPawnsMaximized
 }

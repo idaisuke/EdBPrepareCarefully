@@ -1,13 +1,8 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Verse;
+﻿using System.Collections.Generic;
 
-namespace EdB.PrepareCarefully {
-    class RelationshipGroup {
-        public List<RelatedPawn> Parents = new List<RelatedPawn>();
-        public List<RelatedPawn> Children = new List<RelatedPawn>();
-    }
+namespace EdB.PrepareCarefully;
+
+internal class RelationshipGroup {
+    public List<RelatedPawn> Children = new();
+    public List<RelatedPawn> Parents = new();
 }

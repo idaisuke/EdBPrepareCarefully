@@ -1,91 +1,69 @@
-using RimWorld;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class PawnLayerBeard : PawnLayer {
-        private List<PawnLayerOption> options = new List<PawnLayerOption>();
-        private List<Color> swatches = null;
+namespace EdB.PrepareCarefully;
 
-        public override List<PawnLayerOption> Options {
-            get {
-                return options;
-            }
-            set {
-                options = value;
-            }
+public class PawnLayerBeard : PawnLayer {
+    private List<PawnLayerOption> options = new();
+
+    public override List<PawnLayerOption> Options {
+        get => options;
+        set => options = value;
+    }
+
+    public override ColorSelectorType ColorSelectorType => ColorSelectorType.RGB;
+
+    public override List<Color> ColorSwatches { get; set; } = null;
+
+    public override bool IsOptionSelected(CustomPawn pawn, PawnLayerOption option) {
+        var aOption = option as PawnLayerOptionBeard;
+        if (aOption == null) {
+            return false;
         }
 
-        public override ColorSelectorType ColorSelectorType {
-            get {
-                return ColorSelectorType.RGB;
-            }
-        }
+        return pawn.Beard == aOption.BeardDef;
+    }
 
-        public override List<Color> ColorSwatches {
-            get {
-                return swatches;
-            }
-            set {
-                swatches = value;
-            }
-        }
-
-        public override bool IsOptionSelected(CustomPawn pawn, PawnLayerOption option) {
-            var aOption = option as PawnLayerOptionBeard;
-            if (aOption == null) {
+    public override int? GetSelectedIndex(CustomPawn pawn) {
+        var selectedIndex = options.FirstIndexOf(option => {
+            if (!(option is PawnLayerOptionBeard beardOption)) {
                 return false;
             }
-            return pawn.Beard == aOption.BeardDef;
+
+            return beardOption.BeardDef == pawn.Beard;
+        });
+        if (selectedIndex > -1) {
+            return selectedIndex;
         }
 
-        public override int? GetSelectedIndex(CustomPawn pawn) {
-            int selectedIndex = options.FirstIndexOf((option) => {
-                if (!(option is PawnLayerOptionBeard beardOption)) {
-                    return false;
-                }
-                else {
-                    return beardOption.BeardDef == pawn.Beard;
-                }
-            });
-            if (selectedIndex > -1) {
-                return selectedIndex;
-            }
-            else {
-                return null;
-            }
+        return null;
+    }
+
+    public override PawnLayerOption GetSelectedOption(CustomPawn pawn) {
+        var selectedIndex = GetSelectedIndex(pawn);
+        if (selectedIndex == null) {
+            return null;
         }
 
-        public override PawnLayerOption GetSelectedOption(CustomPawn pawn) {
-            int? selectedIndex = GetSelectedIndex(pawn);
-            if (selectedIndex == null) {
-                return null;
-            }
-            else if (selectedIndex.Value >= 0 && selectedIndex.Value < options.Count) {
-                return options[selectedIndex.Value];
-            }
-            else {
-                return null;
-            }
+        if (selectedIndex.Value >= 0 && selectedIndex.Value < options.Count) {
+            return options[selectedIndex.Value];
         }
 
-        public override void SelectOption(CustomPawn pawn, PawnLayerOption option) {
-            if (option is PawnLayerOptionBeard beardOption) {
-                pawn.Beard = beardOption.BeardDef;
-            }
-        }
+        return null;
+    }
 
-        public override Color GetSelectedColor(CustomPawn pawn) {
-            return pawn.HairColor;
+    public override void SelectOption(CustomPawn pawn, PawnLayerOption option) {
+        if (option is PawnLayerOptionBeard beardOption) {
+            pawn.Beard = beardOption.BeardDef;
         }
+    }
 
-        public override void SelectColor(CustomPawn pawn, Color color) {
-            pawn.HairColor = color;
-        }
+    public override Color GetSelectedColor(CustomPawn pawn) {
+        return pawn.HairColor;
+    }
+
+    public override void SelectColor(CustomPawn pawn, Color color) {
+        pawn.HairColor = color;
     }
 }

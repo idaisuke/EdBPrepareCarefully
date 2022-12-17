@@ -1,49 +1,33 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using UnityEngine;
-using Verse;
-using Verse.Sound;
 
-namespace EdB.PrepareCarefully {
-    public class ParentChildGroup {
-        private List<CustomPawn> parents = new List<CustomPawn>();
-        private List<CustomPawn> children = new List<CustomPawn>();
-        public List<CustomPawn> Parents {
-            get {
-                return parents;
-            }
-            set {
-                parents = value;
-            }
+namespace EdB.PrepareCarefully;
+
+public class ParentChildGroup {
+    public List<CustomPawn> Parents { get; set; } = new();
+
+    public List<CustomPawn> Children { get; set; } = new();
+
+    public override string ToString() {
+        var result = " CustomParentChildGroup { parents = ";
+        if (Parents == null) {
+            result += "null";
         }
-        public List<CustomPawn> Children {
-            get {
-                return children;
-            }
-            set {
-                children = value;
-            }
+        else {
+            result += "[" + string.Join(", ",
+                Parents.Select(pawn => { return pawn == null ? "null" : pawn.ToString(); }).ToArray()) + "]";
         }
-        public override string ToString() {
-            string result = " CustomParentChildGroup { parents = ";
-            if (parents == null) {
-                result += "null";
-            }
-            else {
-                result += "[" + string.Join(", ", parents.Select((CustomPawn pawn) => { return pawn == null ? "null" : pawn.ToString(); }).ToArray()) + "]";
-            }
-            result += ", " + (children != null ? children.Count.ToString() : "0") + " children = ";
-            if (children == null) {
-                result += "null";
-            }
-            else {
-                result += "[" + string.Join(", ", children.Select((CustomPawn pawn) => { return pawn == null ? "null" : pawn.ToString(); }).ToArray()) + "]";
-            }
-            result += " }";
-            return result;
+
+        result += ", " + (Children != null ? Children.Count.ToString() : "0") + " children = ";
+        if (Children == null) {
+            result += "null";
         }
+        else {
+            result += "[" + string.Join(", ",
+                Children.Select(pawn => { return pawn == null ? "null" : pawn.ToString(); }).ToArray()) + "]";
+        }
+
+        result += " }";
+        return result;
     }
 }

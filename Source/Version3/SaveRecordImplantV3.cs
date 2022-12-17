@@ -1,29 +1,23 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Verse;
+﻿using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class SaveRecordImplantV3 : IExposable {
-        public string bodyPart = null;
-        public int? bodyPartIndex = null;
-        public string recipe = null;
+namespace EdB.PrepareCarefully;
 
-        public SaveRecordImplantV3() {
-        }
+public class SaveRecordImplantV3 : IExposable {
+    public string bodyPart;
+    public int? bodyPartIndex;
+    public string recipe;
 
-        public SaveRecordImplantV3(Implant option) {
-            this.bodyPart = option.BodyPartRecord.def.defName;
-            this.recipe = option.recipe != null ? option.recipe.defName : null;
-        }
+    public SaveRecordImplantV3() {
+    }
 
-        public void ExposeData() {
-            Scribe_Values.Look<string>(ref this.bodyPart, "bodyPart", null, false);
-            Scribe_Values.Look<int?>(ref this.bodyPartIndex, "bodyPartIndex", null, false);
-            Scribe_Values.Look<string>(ref recipe, "recipe", null, false);
-        }
+    public SaveRecordImplantV3(Implant option) {
+        bodyPart = option.BodyPartRecord.def.defName;
+        recipe = option.recipe != null ? option.recipe.defName : null;
+    }
+
+    public void ExposeData() {
+        Scribe_Values.Look<string>(ref bodyPart, "bodyPart");
+        Scribe_Values.Look(ref bodyPartIndex, "bodyPartIndex");
+        Scribe_Values.Look<string>(ref recipe, "recipe");
     }
 }
-

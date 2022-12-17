@@ -2,124 +2,133 @@
 using UnityEngine;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class Dialog_Confirm : Window {
-        private Vector2 scrollPos = new Vector2();
-        private const float TitleHeight = 40f;
-        private string text;
-        private Action confirmedAction;
-        private bool destructiveAction;
-        private string title;
-        public string confirmLabel;
-        public string goBackLabel;
-        public bool showGoBack;
-        public float interactionDelay;
-        private float scrollViewHeight;
-        private float createRealTime;
+namespace EdB.PrepareCarefully;
 
-        public override Vector2 InitialSize {
-            get {
-                float y = 300f;
-                if (this.title != null)
-                    y += 40f;
-                return new Vector2(500f, y);
-            }
-        }
+public class Dialog_Confirm : Window {
+    private const float TitleHeight = 40f;
+    private readonly Action confirmedAction;
+    private readonly float createRealTime;
+    private readonly bool destructiveAction;
+    private readonly string text;
+    private readonly string title;
+    public string confirmLabel;
+    public string goBackLabel;
+    public float interactionDelay;
+    private Vector2 scrollPos;
+    private float scrollViewHeight;
+    public bool showGoBack;
 
-        private float TimeUntilInteractive {
-            get {
-                return this.interactionDelay - (Time.realtimeSinceStartup - this.createRealTime);
-            }
-        }
-
-        private bool InteractionDelayExpired {
-            get {
-                return (double)this.TimeUntilInteractive <= 0.0;
-            }
-        }
-
-        public Dialog_Confirm(string text, Action confirmedAction) {
-            this.text = text;
-            this.confirmedAction = confirmedAction;
-            this.destructiveAction = false;
-            this.title = null;
-            this.showGoBack = true;
-            this.confirmLabel = "EdB.PC.Common.Confirm".Translate();
-            this.goBackLabel = "EdB.PC.Common.Cancel".Translate();
-            this.forcePause = true;
-            this.absorbInputAroundWindow = true;
-            this.closeOnCancel = showGoBack;
-            this.createRealTime = Time.realtimeSinceStartup;
-        }
+    public Dialog_Confirm(string text, Action confirmedAction) {
+        this.text = text;
+        this.confirmedAction = confirmedAction;
+        destructiveAction = false;
+        title = null;
+        showGoBack = true;
+        confirmLabel = "EdB.PC.Common.Confirm".Translate();
+        goBackLabel = "EdB.PC.Common.Cancel".Translate();
+        forcePause = true;
+        absorbInputAroundWindow = true;
+        closeOnCancel = showGoBack;
+        createRealTime = Time.realtimeSinceStartup;
+    }
 
 
-        public Dialog_Confirm(string text, Action confirmedAction, bool destructive) {
-            this.text = text;
-            this.confirmedAction = confirmedAction;
-            this.destructiveAction = destructive;
-            this.title = null;
-            this.showGoBack = true;
-            this.confirmLabel = "EdB.PC.Common.Confirm".Translate();
-            this.goBackLabel = "EdB.PC.Common.Cancel".Translate();
-            this.forcePause = true;
-            this.absorbInputAroundWindow = true;
-            this.closeOnCancel = showGoBack;
-            this.createRealTime = Time.realtimeSinceStartup;
-        }
+    public Dialog_Confirm(string text, Action confirmedAction, bool destructive) {
+        this.text = text;
+        this.confirmedAction = confirmedAction;
+        destructiveAction = destructive;
+        title = null;
+        showGoBack = true;
+        confirmLabel = "EdB.PC.Common.Confirm".Translate();
+        goBackLabel = "EdB.PC.Common.Cancel".Translate();
+        forcePause = true;
+        absorbInputAroundWindow = true;
+        closeOnCancel = showGoBack;
+        createRealTime = Time.realtimeSinceStartup;
+    }
 
-        public Dialog_Confirm(string text, Action confirmedAction, bool destructive, string title) {
-            this.text = text;
-            this.confirmedAction = confirmedAction;
-            this.destructiveAction = destructive;
-            this.title = title;
-            this.showGoBack = true;
-            this.confirmLabel = "EdB.PC.Common.Confirm".Translate();
-            this.goBackLabel = "EdB.PC.Common.Cancel".Translate();
-            this.forcePause = true;
-            this.absorbInputAroundWindow = true;
-            this.closeOnCancel = showGoBack;
-            this.createRealTime = Time.realtimeSinceStartup;
-        }
-        public Dialog_Confirm(string text, Action confirmedAction, bool destructive, string title, bool showGoBack) {
-            this.text = text;
-            this.confirmedAction = confirmedAction;
-            this.destructiveAction = destructive;
-            this.title = title;
-            this.showGoBack = showGoBack;
-            this.confirmLabel = "EdB.PC.Common.Confirm".Translate();
-            this.goBackLabel = "EdB.PC.Common.Cancel".Translate();
-            this.forcePause = true;
-            this.absorbInputAroundWindow = true;
-            this.closeOnCancel = showGoBack;
-            this.createRealTime = Time.realtimeSinceStartup;
-        }
+    public Dialog_Confirm(string text, Action confirmedAction, bool destructive, string title) {
+        this.text = text;
+        this.confirmedAction = confirmedAction;
+        destructiveAction = destructive;
+        this.title = title;
+        showGoBack = true;
+        confirmLabel = "EdB.PC.Common.Confirm".Translate();
+        goBackLabel = "EdB.PC.Common.Cancel".Translate();
+        forcePause = true;
+        absorbInputAroundWindow = true;
+        closeOnCancel = showGoBack;
+        createRealTime = Time.realtimeSinceStartup;
+    }
 
-        public override void DoWindowContents(Rect inRect) {
-            float y = inRect.y;
-            if (!this.title.NullOrEmpty()) {
-                Text.Font = GameFont.Medium;
-                Widgets.Label(new Rect(0.0f, y, inRect.width, 40f), this.title);
+    public Dialog_Confirm(string text, Action confirmedAction, bool destructive, string title, bool showGoBack) {
+        this.text = text;
+        this.confirmedAction = confirmedAction;
+        destructiveAction = destructive;
+        this.title = title;
+        this.showGoBack = showGoBack;
+        confirmLabel = "EdB.PC.Common.Confirm".Translate();
+        goBackLabel = "EdB.PC.Common.Cancel".Translate();
+        forcePause = true;
+        absorbInputAroundWindow = true;
+        closeOnCancel = showGoBack;
+        createRealTime = Time.realtimeSinceStartup;
+    }
+
+    public override Vector2 InitialSize {
+        get {
+            var y = 300f;
+            if (title != null) {
                 y += 40f;
             }
-            Text.Font = GameFont.Small;
-            Rect outRect = new Rect(0.0f, y, inRect.width, inRect.height - 45f - y);
-            Rect viewRect = new Rect(0.0f, 0.0f, inRect.width - 16f, this.scrollViewHeight);
-            Widgets.BeginScrollView(outRect, ref this.scrollPos, viewRect);
-            Widgets.Label(new Rect(0.0f, 0.0f, viewRect.width, this.scrollViewHeight), this.text);
-            if (Event.current.type == EventType.Layout)
-                this.scrollViewHeight = Text.CalcHeight(this.text, viewRect.width);
-            Widgets.EndScrollView();
-            if (this.destructiveAction)
-                GUI.color = new Color(1f, 0.3f, 0.35f);
-            string label = !this.InteractionDelayExpired ? this.confirmLabel + "(" + Mathf.Ceil(this.TimeUntilInteractive).ToString("F0") + ")" : this.confirmLabel;
-            if (Widgets.ButtonText(new Rect((float)((double)inRect.width / 2.0 + 20.0), inRect.height - 35f, (float)((double)inRect.width / 2.0 - 20.0), 35f), label, true, false, true) && this.InteractionDelayExpired) {
-                this.confirmedAction();
-                this.Close(true);
-            }
-            GUI.color = Color.white;
-            if (!this.showGoBack || !Widgets.ButtonText(new Rect(0.0f, inRect.height - 35f, (float)((double)inRect.width / 2.0 - 20.0), 35f), this.goBackLabel, true, false, true))
-                return;
-            this.Close(true);
+
+            return new Vector2(500f, y);
         }
+    }
+
+    private float TimeUntilInteractive => interactionDelay - (Time.realtimeSinceStartup - createRealTime);
+
+    private bool InteractionDelayExpired => TimeUntilInteractive <= 0.0;
+
+    public override void DoWindowContents(Rect inRect) {
+        var y = inRect.y;
+        if (!title.NullOrEmpty()) {
+            Text.Font = GameFont.Medium;
+            Widgets.Label(new Rect(0.0f, y, inRect.width, 40f), title);
+            y += 40f;
+        }
+
+        Text.Font = GameFont.Small;
+        var outRect = new Rect(0.0f, y, inRect.width, inRect.height - 45f - y);
+        var viewRect = new Rect(0.0f, 0.0f, inRect.width - 16f, scrollViewHeight);
+        Widgets.BeginScrollView(outRect, ref scrollPos, viewRect);
+        Widgets.Label(new Rect(0.0f, 0.0f, viewRect.width, scrollViewHeight), text);
+        if (Event.current.type == EventType.Layout) {
+            scrollViewHeight = Text.CalcHeight(text, viewRect.width);
+        }
+
+        Widgets.EndScrollView();
+        if (destructiveAction) {
+            GUI.color = new Color(1f, 0.3f, 0.35f);
+        }
+
+        var label = !InteractionDelayExpired
+            ? confirmLabel + "(" + Mathf.Ceil(TimeUntilInteractive).ToString("F0") + ")"
+            : confirmLabel;
+        if (Widgets.ButtonText(
+                new Rect((float)((inRect.width / 2.0) + 20.0), inRect.height - 35f,
+                    (float)((inRect.width / 2.0) - 20.0), 35f), label, true, false) && InteractionDelayExpired) {
+            confirmedAction();
+            Close();
+        }
+
+        GUI.color = Color.white;
+        if (!showGoBack ||
+            !Widgets.ButtonText(new Rect(0.0f, inRect.height - 35f, (float)((inRect.width / 2.0) - 20.0), 35f),
+                goBackLabel, true, false)) {
+            return;
+        }
+
+        Close();
     }
 }

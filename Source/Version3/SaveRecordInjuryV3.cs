@@ -1,50 +1,38 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Verse;
+﻿using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class SaveRecordInjuryV3 : IExposable {
-        public string bodyPart = null;
-        public int? bodyPartIndex = null;
-        public string hediffDef = null;
-        public string severity = null;
-        public string painFactor = null;
+namespace EdB.PrepareCarefully;
 
-        public SaveRecordInjuryV3() {
+public class SaveRecordInjuryV3 : IExposable {
+    public string bodyPart;
+    public int? bodyPartIndex;
+    public string hediffDef;
+    public string painFactor;
+    public string severity;
+
+    public SaveRecordInjuryV3() {
+    }
+
+    public SaveRecordInjuryV3(Injury injury) {
+        bodyPart = injury.BodyPartRecord != null ? injury.BodyPartRecord.def.defName : null;
+        hediffDef = injury.Option.HediffDef != null ? injury.Option.HediffDef.defName : null;
+        if (injury.Severity != 0) {
+            severity = injury.Severity.ToString();
         }
 
-        public SaveRecordInjuryV3(Injury injury) {
-            this.bodyPart = injury.BodyPartRecord != null ? injury.BodyPartRecord.def.defName : null;
-            this.hediffDef = injury.Option.HediffDef != null ? injury.Option.HediffDef.defName : null;
-            if (injury.Severity != 0) {
-                this.severity = injury.Severity.ToString();
-            }
-            if (injury.PainFactor != null) {
-                this.painFactor = injury.PainFactor.Value.ToString();
-            }
-        }
-
-        public void ExposeData() {
-            Scribe_Values.Look<string>(ref this.hediffDef, "hediffDef", null, false);
-            Scribe_Values.Look<string>(ref this.bodyPart, "bodyPart", null, false);
-            Scribe_Values.Look<int?>(ref this.bodyPartIndex, "bodyPartIndex", null, false);
-            Scribe_Values.Look<string>(ref this.severity, "severity", null, false);
-            Scribe_Values.Look<string>(ref this.painFactor, "painFactor", null, false);
-        }
-
-        public float Severity {
-            get {
-                return float.Parse(severity);
-            }
-        }
-        public float PainFactor {
-            get {
-                return float.Parse(painFactor);
-            }
+        if (injury.PainFactor != null) {
+            painFactor = injury.PainFactor.Value.ToString();
         }
     }
-}
 
+    public float Severity => float.Parse(severity);
+
+    public float PainFactor => float.Parse(painFactor);
+
+    public void ExposeData() {
+        Scribe_Values.Look<string>(ref hediffDef, "hediffDef");
+        Scribe_Values.Look<string>(ref bodyPart, "bodyPart");
+        Scribe_Values.Look(ref bodyPartIndex, "bodyPartIndex");
+        Scribe_Values.Look<string>(ref severity, "severity");
+        Scribe_Values.Look<string>(ref painFactor, "painFactor");
+    }
+}

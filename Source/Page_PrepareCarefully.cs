@@ -1,30 +1,63 @@
-using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+
 namespace EdB.PrepareCarefully {
     public class Page_PrepareCarefully : Page {
-        public delegate void StartGameHandler();
         public delegate void PresetHandler(string name);
-        
-        public event StartGameHandler GameStarted;
-        public event PresetHandler PresetLoaded;
-        public event PresetHandler PresetSaved;
 
-        private TabViewPawns tabViewPawns;
-        private TabViewEquipment tabViewEquipment;
-        private TabViewRelationships tabViewRelationships;
-        private List<ITabView> tabViews = new List<ITabView>();
-        private List<TabRecord> tabRecords = new List<TabRecord>();
-        private bool pawnListActionThisFrame = false;
-
-        private float? costLabelWidth = null;
+        public delegate void StartGameHandler();
 
         private Controller controller;
+
+        private float? costLabelWidth = null;
+        private bool pawnListActionThisFrame = false;
+        private List<TabRecord> tabRecords = new List<TabRecord>();
+        private TabViewEquipment tabViewEquipment;
+
+        private TabViewPawns tabViewPawns;
+        private TabViewRelationships tabViewRelationships;
+        private List<ITabView> tabViews = new List<ITabView>();
+
+        public Page_PrepareCarefully() {
+            this.closeOnCancel = false;
+            this.closeOnAccept = false;
+            this.closeOnClickedOutside = false;
+            this.doCloseButton = false;
+            this.doCloseX = false;
+
+            Vector2 initialSize = InitialSize;
+            tabViewPawns = new TabViewPawns(LargeUI);
+            tabViewEquipment = new TabViewEquipment();
+            tabViewRelationships = new TabViewRelationships();
+
+            // Add the tab views to the tab view list.
+            tabViews.Add(tabViewPawns);
+            tabViews.Add(tabViewRelationships);
+            tabViews.Add(tabViewEquipment);
+
+            // Create a tab record UI widget for each tab view.
+            foreach (var tab in tabViews) {
+                ITabView currentTab = tab;
+                TabRecord tabRecord = new TabRecord(currentTab.Name, delegate {
+                    // When a new tab is selected, mark the previously selected TabRecord as unselected and the current one as selected.
+                    // Also, update the State to reflected the newly selected ITabView.
+                    if (State.CurrentTab != null) {
+                        State.CurrentTab.TabRecord.selected = false;
+                    }
+
+                    State.CurrentTab = currentTab;
+                    currentTab.TabRecord.selected = true;
+                }, false);
+                currentTab.TabRecord = tabRecord;
+                tabRecords.Add(tabRecord);
+            }
+        }
 
         public bool LargeUI { get; set; }
 
@@ -53,56 +86,8 @@ namespace EdB.PrepareCarefully {
                 //}
 
                 LargeUI = false;
-                return Page.StandardSize;
+                return StandardSize;
             }
-        }
-
-        public override void Notify_ResolutionChanged() {
-            //Logger.Debug("Resolution changed to: [" + Screen.width + " x " + Screen.height + "]");
-            base.Notify_ResolutionChanged();
-        }
-
-        public Page_PrepareCarefully() {
-            this.closeOnCancel = false;
-            this.closeOnAccept = false;
-            this.closeOnClickedOutside = false;
-            this.doCloseButton = false;
-            this.doCloseX = false;
-
-            Vector2 initialSize = InitialSize;
-            tabViewPawns = new TabViewPawns(LargeUI);
-            tabViewEquipment = new TabViewEquipment();
-            tabViewRelationships = new TabViewRelationships();
-
-            // Add the tab views to the tab view list.
-            tabViews.Add(tabViewPawns);
-            tabViews.Add(tabViewRelationships);
-            tabViews.Add(tabViewEquipment);
-            
-            // Create a tab record UI widget for each tab view.
-            foreach (var tab in tabViews) {
-                ITabView currentTab = tab;
-                TabRecord tabRecord = new TabRecord(currentTab.Name, delegate {
-                    // When a new tab is selected, mark the previously selected TabRecord as unselected and the current one as selected.
-                    // Also, update the State to reflected the newly selected ITabView.
-                    if (State.CurrentTab != null) {
-                        State.CurrentTab.TabRecord.selected = false;
-                    }
-                    State.CurrentTab = currentTab;
-                    currentTab.TabRecord.selected = true;
-                }, false);
-                currentTab.TabRecord = tabRecord;
-                tabRecords.Add(tabRecord);
-            }
-
-        }
-
-        override public void OnAcceptKeyPressed() {
-            // Don't close the window if the user clicks the "enter" key.
-        }
-        override public void OnCancelKeyPressed() {
-            // Confirm that the user wants to quit if they click the escape key.
-            ConfirmExit();
         }
 
         public State State {
@@ -116,10 +101,29 @@ namespace EdB.PrepareCarefully {
                 return PrepareCarefully.Instance.Config;
             }
         }
+
         public override string PageTitle {
             get {
                 return "EdB.PC.Page.Title".Translate();
             }
+        }
+
+        public event StartGameHandler GameStarted;
+        public event PresetHandler PresetLoaded;
+        public event PresetHandler PresetSaved;
+
+        public override void Notify_ResolutionChanged() {
+            //Logger.Debug("Resolution changed to: [" + Screen.width + " x " + Screen.height + "]");
+            base.Notify_ResolutionChanged();
+        }
+
+        override public void OnAcceptKeyPressed() {
+            // Don't close the window if the user clicks the "enter" key.
+        }
+
+        override public void OnCancelKeyPressed() {
+            // Confirm that the user wants to quit if they click the escape key.
+            ConfirmExit();
         }
 
         public override void PreOpen() {
@@ -155,6 +159,7 @@ namespace EdB.PrepareCarefully {
                 foreach (var message in State.Messages) {
                     Messages.Message(message, MessageTypeDefOf.NeutralEvent);
                 }
+
                 State.ClearMessages();
             }
 
@@ -163,6 +168,7 @@ namespace EdB.PrepareCarefully {
                 foreach (var message in State.Errors) {
                     Messages.Message(message, MessageTypeDefOf.RejectInput);
                 }
+
                 State.ClearErrors();
             }
 
@@ -200,6 +206,7 @@ namespace EdB.PrepareCarefully {
                     backAct();
                 }
             }
+
             if (nextAct != null) {
                 Rect rect2 = new Rect(innerRect.width - BottomButSize.x, top, BottomButSize.x, BottomButSize.y);
                 if (Widgets.ButtonText(rect2, nextLabel, true, false, true)) {
@@ -216,9 +223,11 @@ namespace EdB.PrepareCarefully {
                     if (stringBuilder.Length > 0) {
                         stringBuilder.AppendLine();
                     }
+
                     stringBuilder.Append("  - " + current.CapitalizeFirst());
                 }
-                string text = "ConfirmRequiredWorkTypeDisabledForEveryone".Translate(stringBuilder.ToString ());
+
+                string text = "ConfirmRequiredWorkTypeDisabledForEveryone".Translate(stringBuilder.ToString());
                 Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(text, delegate {
                     GameStarted();
                 }, false, null));
@@ -237,16 +246,20 @@ namespace EdB.PrepareCarefully {
             //float middle = this.windowRect.width / 2f;
             float buttonWidth = 150;
             float buttonSpacing = 24;
-            if (Widgets.ButtonText(new Rect(middle - buttonWidth - buttonSpacing / 2, top, buttonWidth, 38), "EdB.PC.Page.Button.LoadPreset".Translate(), true, false, true)) {
+            if (Widgets.ButtonText(new Rect(middle - buttonWidth - buttonSpacing / 2, top, buttonWidth, 38),
+                    "EdB.PC.Page.Button.LoadPreset".Translate(), true, false, true)) {
                 Find.WindowStack.Add(new Dialog_LoadPreset((string name) => {
                     PresetLoaded(name);
                 }));
             }
-            if (Widgets.ButtonText(new Rect(middle + buttonSpacing / 2, top, buttonWidth, 38), "EdB.PC.Page.Button.SavePreset".Translate(), true, false, true)) {
+
+            if (Widgets.ButtonText(new Rect(middle + buttonSpacing / 2, top, buttonWidth, 38),
+                    "EdB.PC.Page.Button.SavePreset".Translate(), true, false, true)) {
                 Find.WindowStack.Add(new Dialog_SavePreset((string name) => {
                     PresetSaved(name);
                 }));
             }
+
             GUI.color = Color.white;
         }
 
@@ -261,6 +274,7 @@ namespace EdB.PrepareCarefully {
                     string translated2 = "EdB.PC.Page.Points.Remaining".Translate(max);
                     costLabelWidth = Mathf.Max(Text.CalcSize(translated1).x, Text.CalcSize(translated2).x);
                 }
+
                 CostDetails cost = PrepareCarefully.Instance.Cost;
                 string label;
                 if (Config.pointsEnabled) {
@@ -271,6 +285,7 @@ namespace EdB.PrepareCarefully {
                     else {
                         GUI.color = Style.ColorText;
                     }
+
                     label = "EdB.PC.Page.Points.Remaining".Translate(points);
                 }
                 else {
@@ -278,6 +293,7 @@ namespace EdB.PrepareCarefully {
                     GUI.color = Style.ColorText;
                     label = "EdB.PC.Page.Points.Spent".Translate(points);
                 }
+
                 Rect rect = new Rect(parentRect.width - costLabelWidth.Value, 2, costLabelWidth.Value, 32);
                 Widgets.Label(rect, label);
 
@@ -285,12 +301,15 @@ namespace EdB.PrepareCarefully {
                 tooltipText += "EdB.PC.Page.Points.ScenarioPoints".Translate(PrepareCarefully.Instance.StartingPoints);
                 tooltipText += "\n\n";
                 foreach (var c in cost.colonistDetails) {
-                    tooltipText += "EdB.PC.Page.Points.CostSummary.Colonist".Translate(c.name, (c.total - c.apparel - c.bionics)) + "\n";
+                    tooltipText +=
+                        "EdB.PC.Page.Points.CostSummary.Colonist".Translate(c.name, (c.total - c.apparel - c.bionics)) +
+                        "\n";
                 }
+
                 tooltipText += "\n" + "EdB.PC.Page.Points.CostSummary.Apparel".Translate(cost.colonistApparel) + "\n"
-                    + "EdB.PC.Page.Points.CostSummary.Implants".Translate(cost.colonistBionics) + "\n"
-                    + "EdB.PC.Page.Points.CostSummary.Equipment".Translate(cost.equipment) + "\n\n"
-                    + "EdB.PC.Page.Points.CostSummary.Total".Translate(cost.total);
+                               + "EdB.PC.Page.Points.CostSummary.Implants".Translate(cost.colonistBionics) + "\n"
+                               + "EdB.PC.Page.Points.CostSummary.Equipment".Translate(cost.equipment) + "\n\n"
+                               + "EdB.PC.Page.Points.CostSummary.Total".Translate(cost.total);
                 TipSignal tip = new TipSignal(() => tooltipText, tooltipText.GetHashCode());
                 TooltipHandler.TipRegion(rect, tip);
 
@@ -302,11 +321,13 @@ namespace EdB.PrepareCarefully {
                 float optionTop = rect.y;
                 optionLabel = "EdB.PC.Page.Points.UsePoints".Translate();
                 Vector2 size = Text.CalcSize(optionLabel);
-                Rect optionRect = new Rect(parentRect.width - costLabelWidth.Value - size.x - 100, optionTop, size.x + 10, 32);
+                Rect optionRect = new Rect(parentRect.width - costLabelWidth.Value - size.x - 100, optionTop,
+                    size.x + 10, 32);
                 Widgets.Label(optionRect, optionLabel);
                 GUI.color = Color.white;
                 TooltipHandler.TipRegion(optionRect, "EdB.PC.Page.Points.UsePoints.Tip".Translate());
-                Widgets.Checkbox(new Vector2(optionRect.x + optionRect.width, optionRect.y - 3), ref Config.pointsEnabled, 24, false);
+                Widgets.Checkbox(new Vector2(optionRect.x + optionRect.width, optionRect.y - 3),
+                    ref Config.pointsEnabled, 24, false);
             }
             finally {
                 Text.Anchor = TextAnchor.UpperLeft;
@@ -333,7 +354,9 @@ namespace EdB.PrepareCarefully {
                 pawnListActionThisFrame = true;
                 SoundDefOf.ThingSelected.PlayOneShotOnCamera();
                 controller.SubcontrollerCharacters.SwapPawn(pawn);
-                PawnListMode newMode = PrepareCarefully.Instance.State.PawnListMode == PawnListMode.ColonyPawnsMaximized ? PawnListMode.WorldPawnsMaximized : PawnListMode.ColonyPawnsMaximized;
+                PawnListMode newMode = PrepareCarefully.Instance.State.PawnListMode == PawnListMode.ColonyPawnsMaximized
+                    ? PawnListMode.WorldPawnsMaximized
+                    : PawnListMode.ColonyPawnsMaximized;
                 PrepareCarefully.Instance.State.PawnListMode = newMode;
                 tabViewPawns.ResizeTabView();
                 if (newMode == PawnListMode.ColonyPawnsMaximized) {
@@ -347,7 +370,7 @@ namespace EdB.PrepareCarefully {
 
         protected void InstrumentPanels() {
             State state = PrepareCarefully.Instance.State;
-            
+
             GameStarted += controller.StartGame;
             PresetLoaded += controller.LoadPreset;
             PresetSaved += controller.SavePreset;
@@ -365,7 +388,9 @@ namespace EdB.PrepareCarefully {
             };
 
             tabViewPawns.PanelBackstory.BackstoryUpdated += pawnController.UpdateBackstory;
-            tabViewPawns.PanelBackstory.BackstoryUpdated += (BackstorySlot slot, Backstory backstory) => { pawnController.CheckPawnCapabilities(); };
+            tabViewPawns.PanelBackstory.BackstoryUpdated += (BackstorySlot slot, Backstory backstory) => {
+                pawnController.CheckPawnCapabilities();
+            };
             tabViewPawns.PanelBackstory.BackstoriesRandomized += pawnController.RandomizeBackstories;
             tabViewPawns.PanelBackstory.BackstoriesRandomized += () => { pawnController.CheckPawnCapabilities(); };
 
@@ -373,19 +398,27 @@ namespace EdB.PrepareCarefully {
             tabViewPawns.PanelColonyPawns.AddingPawn += pawnController.AddingPawn;
             tabViewPawns.PanelColonyPawns.AddingPawnWithPawnKind += pawnController.AddFactionPawn;
             tabViewPawns.PanelColonyPawns.PawnDeleted += pawnController.DeletePawn;
-            tabViewPawns.PanelColonyPawns.PawnDeleted += (CustomPawn pawn) => { pawnController.CheckPawnCapabilities(); };
+            tabViewPawns.PanelColonyPawns.PawnDeleted += (CustomPawn pawn) => {
+                pawnController.CheckPawnCapabilities();
+            };
             tabViewPawns.PanelColonyPawns.PawnSwapped += this.SwapPawn;
             tabViewPawns.PanelColonyPawns.CharacterLoaded += pawnController.LoadCharacter;
-            tabViewPawns.PanelColonyPawns.CharacterLoaded += (string filename) => { pawnController.CheckPawnCapabilities(); };
+            tabViewPawns.PanelColonyPawns.CharacterLoaded += (string filename) => {
+                pawnController.CheckPawnCapabilities();
+            };
 
             tabViewPawns.PanelWorldPawns.PawnSelected += this.SelectPawn;
             tabViewPawns.PanelWorldPawns.AddingPawn += pawnController.AddingPawn;
             tabViewPawns.PanelWorldPawns.AddingPawnWithPawnKind += pawnController.AddFactionPawn;
             tabViewPawns.PanelWorldPawns.PawnDeleted += pawnController.DeletePawn;
-            tabViewPawns.PanelWorldPawns.PawnDeleted += (CustomPawn pawn) => { pawnController.CheckPawnCapabilities(); };
+            tabViewPawns.PanelWorldPawns.PawnDeleted += (CustomPawn pawn) => {
+                pawnController.CheckPawnCapabilities();
+            };
             tabViewPawns.PanelWorldPawns.PawnSwapped += this.SwapPawn;
             tabViewPawns.PanelWorldPawns.CharacterLoaded += pawnController.LoadCharacter;
-            tabViewPawns.PanelWorldPawns.CharacterLoaded += (string filename) => { pawnController.CheckPawnCapabilities(); };
+            tabViewPawns.PanelWorldPawns.CharacterLoaded += (string filename) => {
+                pawnController.CheckPawnCapabilities();
+            };
 
             tabViewPawns.PanelColonyPawns.Maximize += () => {
                 state.PawnListMode = PawnListMode.ColonyPawnsMaximized;
@@ -404,6 +437,7 @@ namespace EdB.PrepareCarefully {
                 else {
                     pawnList = tabViewPawns.PanelWorldPawns;
                 }
+
                 pawnList.ScrollToBottom();
                 pawnList.SelectPawn(pawn);
             };
@@ -455,10 +489,14 @@ namespace EdB.PrepareCarefully {
             ControllerRelationships relationships = controller.SubcontrollerRelationships;
             tabViewRelationships.PanelRelationshipsOther.RelationshipAdded += relationships.AddRelationship;
             tabViewRelationships.PanelRelationshipsOther.RelationshipRemoved += relationships.RemoveRelationship;
-            tabViewRelationships.PanelRelationshipsParentChild.ParentAddedToGroup += relationships.AddParentToParentChildGroup;
-            tabViewRelationships.PanelRelationshipsParentChild.ChildAddedToGroup += relationships.AddChildToParentChildGroup;
-            tabViewRelationships.PanelRelationshipsParentChild.ParentRemovedFromGroup += relationships.RemoveParentFromParentChildGroup;
-            tabViewRelationships.PanelRelationshipsParentChild.ChildRemovedFromGroup += relationships.RemoveChildFromParentChildGroup;
+            tabViewRelationships.PanelRelationshipsParentChild.ParentAddedToGroup +=
+                relationships.AddParentToParentChildGroup;
+            tabViewRelationships.PanelRelationshipsParentChild.ChildAddedToGroup +=
+                relationships.AddChildToParentChildGroup;
+            tabViewRelationships.PanelRelationshipsParentChild.ParentRemovedFromGroup +=
+                relationships.RemoveParentFromParentChildGroup;
+            tabViewRelationships.PanelRelationshipsParentChild.ChildRemovedFromGroup +=
+                relationships.RemoveChildFromParentChildGroup;
             tabViewRelationships.PanelRelationshipsParentChild.GroupAdded += relationships.AddParentChildGroup;
             tabViewPawns.PanelColonyPawns.PawnDeleted += relationships.DeleteAllPawnRelationships;
             pawnController.PawnAdded += relationships.AddPawn;

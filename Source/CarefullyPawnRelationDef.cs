@@ -1,34 +1,33 @@
-﻿using RimWorld;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using RimWorld;
 using Verse;
 
-namespace EdB.PrepareCarefully {
-    public class CarefullyPawnRelationDef : Def {
-        public string inverse = null;
+namespace EdB.PrepareCarefully;
 
-        public bool animal = false;
+public class CarefullyPawnRelationDef : Def {
+    public bool animal = false;
 
-        public List<String> conflicts = null;
+    public List<String> conflicts = null;
+    public string inverse = null;
 
-        public Type workerClass = null;
+    public bool needsCompatibility = false;
 
-        public bool needsCompatibility = false;
+    [Unsaved] private PawnRelationWorker worker;
 
-        [Unsaved]
-        private PawnRelationWorker worker;
+    public Type workerClass = null;
 
-        public PawnRelationWorker Worker {
-            get {
-                if (this.workerClass != null && this.worker == null) {
-                    PawnRelationDef pawnRelationDef = DefDatabase<PawnRelationDef>.GetNamedSilentFail(this.defName);
-                    if (pawnRelationDef != null) {
-                        this.worker = (PawnRelationWorker)Activator.CreateInstance(this.workerClass);
-                        this.worker.def = pawnRelationDef;
-                    }
+    public PawnRelationWorker Worker {
+        get {
+            if (workerClass != null && worker == null) {
+                var pawnRelationDef = DefDatabase<PawnRelationDef>.GetNamedSilentFail(defName);
+                if (pawnRelationDef != null) {
+                    worker = (PawnRelationWorker)Activator.CreateInstance(workerClass);
+                    worker.def = pawnRelationDef;
                 }
-                return this.worker;
             }
+
+            return worker;
         }
     }
 }
