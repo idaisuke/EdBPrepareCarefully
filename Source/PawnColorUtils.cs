@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
-using EdB.PrepareCarefully.Reflection;
+using System.Linq;
+using RimWorld;
 using UnityEngine;
 
 namespace EdB.PrepareCarefully;
@@ -24,28 +24,10 @@ public class PawnColorUtils {
     // instead of just copying the color list via reflection.  This will make it work better with mods that
     // detour the color methods in that class--as long as they detour the GetSkinDataIndexOfMelanin() method.
     public static void InitializeColors() {
-        var values = new List<float>();
-
         // Iterate all values from 0.0f to 1.0f, using increments of 0.01f, to get the left index for each value.
         // Use this technique to construct a list of all of the indexes and their values.  Once we have the list
         // of indexes and their values, we can use the GetSkinColor() method to get the actual colors.
-        var currentIndex = 0;
-        values.Add(0.0f);
-        var f = 0.01f;
-        var counter = 1;
-        while (f < 1.0f) {
-            var result = PawnSkinColors.GetSkinDataIndexOfMelanin(f);
-            if (result != currentIndex) {
-                currentIndex = result;
-                values.Add(f);
-            }
-
-            counter++;
-            var d = counter / 100.0;
-            f = (float)d;
-        }
-
-        values.Add(1.0f);
+        var values = PawnSkinColors.SkinColorGenesInOrder.Select(it => it.minMelanin).ToList();
 
         // Allocate the arrays and fill them with the correct values.
         var length = values.Count;
@@ -54,7 +36,7 @@ public class PawnColorUtils {
         RoundedColors = new Color[length];
         for (var i = 0; i < length; i++) {
             var v = values[i];
-            var color = RimWorld.PawnSkinColors.GetSkinColor(v);
+            var color = PawnSkinColors.GetSkinColor(v);
             Colors[i] = color;
             RoundedColors[i] = color;
             RoundedColors[i].r = (float)Math.Round(color.r, 3);
