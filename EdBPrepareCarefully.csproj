@@ -223,7 +223,7 @@
     <Compile Include="Source\PawnColorUtils.cs" />
     <Compile Include="Source\Dialog_Confirm.cs" />
     <Compile Include="Source\ThingCache.cs" />
-    <Compile Include="Source\Page_PrepareCarefully.cs" />
+    <Compile Include="Source\PagePrepareCarefully.cs" />
     <Compile Include="Source\ITabView.cs" />
     <Compile Include="Source\TabViewPawns.cs" />
     <Compile Include="Source\TabViewEquipment.cs" />

@@ -8,17 +8,11 @@ using Verse;
 namespace EdB.PrepareCarefully;
 
 public class ControllerPawns {
-    public delegate void ColonyPawnsMaximizedHandler();
-
     public delegate void PawnAddedHandler(CustomPawn pawn);
-
-    public delegate void PawnListsSplitHandler();
 
     public delegate void PawnReplacedHandler(CustomPawn pawn);
 
-    public delegate void WorldPawnsMaximizedHandler();
-
-    private readonly ProviderAgeLimits ProviderAgeLimits = PrepareCarefully.Instance.Providers.AgeLimits;
+    private readonly ProviderAgeLimits providerAgeLimits = PrepareCarefully.Instance.Providers.AgeLimits;
     private readonly Randomizer randomizer = new();
 
     private readonly State state;
@@ -99,11 +93,15 @@ public class ControllerPawns {
 
     // Backstory-related actions.
     public void UpdateBackstory(BackstorySlot slot, BackstoryDef backstory) {
-        if (slot == BackstorySlot.Childhood) {
-            state.CurrentPawn.Childhood = backstory;
-        }
-        else if (slot == BackstorySlot.Adulthood) {
-            state.CurrentPawn.Adulthood = backstory;
+        switch (slot) {
+            case BackstorySlot.Childhood:
+                state.CurrentPawn.Childhood = backstory;
+                break;
+            case BackstorySlot.Adulthood:
+                state.CurrentPawn.Adulthood = backstory;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(slot), slot, null);
         }
     }
 
@@ -189,18 +187,13 @@ public class ControllerPawns {
 
     // Age-related actions.
     public void UpdateBiologicalAge(int age) {
-        var min = ProviderAgeLimits.MinAgeForPawn(state.CurrentPawn.Pawn);
-        var max = ProviderAgeLimits.MaxAgeForPawn(state.CurrentPawn.Pawn);
+        var min = providerAgeLimits.MinAgeForPawn(state.CurrentPawn.Pawn);
+        var max = providerAgeLimits.MaxAgeForPawn(state.CurrentPawn.Pawn);
         if (age < min) {
             age = min;
         }
         else if (age > max || age > state.CurrentPawn.ChronologicalAge) {
-            if (age > max) {
-                age = max;
-            }
-            else {
-                age = state.CurrentPawn.ChronologicalAge;
-            }
+            age = age > max ? max : state.CurrentPawn.ChronologicalAge;
         }
 
         state.CurrentPawn.BiologicalAge = age;
@@ -324,12 +317,13 @@ public class ControllerPawns {
             return;
         }
 
-        var pawn = ColonistLoader.LoadFromFile(PrepareCarefully.Instance, name);
-        if (pawn != null) {
+        CustomPawn pawn;
+        try {
+            pawn = ColonistLoader.LoadFromFile(name);
             state.AddMessage("EdB.PC.Dialog.PawnPreset.Loaded".Translate(name));
         }
-        else {
-            state.AddError("Failed to load pawn");
+        catch (Exception e) {
+            state.AddError($"Failed to load pawn because of {e}");
             return;
         }
 
@@ -353,7 +347,7 @@ public class ControllerPawns {
     }
 
     public void AddFactionPawn(PawnKindDef kindDef, bool startingPawn) {
-        Pawn pawn = null;
+        Pawn pawn;
         try {
             //Logger.Debug("Adding new pawn with kindDef = " + kindDef.defName);
             var wrapper = new PawnGenerationRequestWrapper {
@@ -372,10 +366,6 @@ public class ControllerPawns {
         }
         catch (Exception e) {
             Logger.Warning("Failed to create faction pawn of kind " + kindDef.defName, e);
-            if (pawn != null) {
-                pawn.Destroy();
-            }
-
             state.AddError("EdB.PC.Panel.PawnList.Error.FactionPawnFailed".Translate());
             return;
         }
@@ -392,8 +382,7 @@ public class ControllerPawns {
         //    pawn.royalty = new Pawn_RoyaltyTracker(pawn);
         //}
 
-        var customPawn = new CustomPawn(pawn);
-        customPawn.OriginalKindDef = kindDef;
+        var customPawn = new CustomPawn(pawn) { OriginalKindDef = kindDef };
         var factionDef = kindDef.defaultFactionType;
         customPawn.OriginalFactionDef = factionDef;
         if (pawn.Faction != Faction.OfPlayer) {
@@ -415,22 +404,18 @@ public class ControllerPawns {
 
     // Gender-related actions.
     public void UpdateGender(Gender gender) {
-        state.CurrentPawn.Gender = gender;
+        if (state.CurrentPawn != null) {
+            state.CurrentPawn.Gender = gender;
+        }
     }
 
     // Health-related actions.
     public void AddInjury(Injury injury) {
-        var currentPawn = state.CurrentPawn;
-        if (currentPawn != null) {
-            state.CurrentPawn.AddInjury(injury);
-        }
+        state.CurrentPawn?.AddInjury(injury);
     }
 
     public void AddImplant(Implant implant) {
-        var currentPawn = state.CurrentPawn;
-        if (currentPawn != null) {
-            currentPawn.AddImplant(implant);
-        }
+        state.CurrentPawn?.AddImplant(implant);
     }
 
     public void RemoveHediff(Hediff hediff) {

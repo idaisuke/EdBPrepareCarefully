@@ -6,10 +6,10 @@ namespace EdB.PrepareCarefully;
 public class PanelAge : PanelBase {
     public delegate void UpdateAgeHandler(int age);
 
-    protected static Rect RectBiologicalAgeLabel;
-    protected static Rect RectBiologicalAgeField;
-    protected static Rect RectChronologicalAgeLabel;
-    protected static Rect RectChronologicalAgeField;
+    private static Rect _rectBiologicalAgeLabel;
+    private static Rect _rectBiologicalAgeField;
+    private static Rect _rectChronologicalAgeLabel;
+    private static Rect _rectChronologicalAgeField;
 
     private readonly WidgetNumberField biologicalField;
     private readonly WidgetNumberField chronologicalField;
@@ -18,43 +18,34 @@ public class PanelAge : PanelBase {
 
     public PanelAge() {
         biologicalField = new WidgetNumberField {
-            DragSlider = new DragSlider(0.4f, 20, 100),
-            MinValue = 14,
-            MaxValue = 99,
-            UpdateAction = value => {
-                UpdateBiologicalAge(value);
-            }
+            DragSlider = new DragSlider(0.4f, 20, 100), MinValue = 14, MaxValue = 99, UpdateAction = UpdateBiologicalAge
         };
         chronologicalField = new WidgetNumberField {
             DragSlider = new DragSlider(0.4f, 15, 100),
             MinValue = 14,
             MaxValue = Constraints.AgeChronologicalMax,
-            UpdateAction = value => {
-                UpdateChronologicalAge(value);
-            }
+            UpdateAction = UpdateChronologicalAge
         };
     }
 
-    public event UpdateAgeHandler BiologicalAgeUpdated;
-    public event UpdateAgeHandler ChronologicalAgeUpdated;
+    public event UpdateAgeHandler? BiologicalAgeUpdated;
+    public event UpdateAgeHandler? ChronologicalAgeUpdated;
 
-    protected void UpdateBiologicalAge(int value) {
-        BiologicalAgeUpdated(value);
+    private void UpdateBiologicalAge(int value) {
+        BiologicalAgeUpdated?.Invoke(value);
     }
 
-    protected void UpdateChronologicalAge(int value) {
-        ChronologicalAgeUpdated(value);
+    private void UpdateChronologicalAge(int value) {
+        ChronologicalAgeUpdated?.Invoke(value);
     }
 
     public override void Resize(Rect rect) {
         base.Resize(rect);
 
-        var available = PanelRect.size - Style.SizePanelPadding;
-
-        float arrowPadding = 1;
+        const float arrowPadding = 1;
         float arrowWidth = Textures.TextureButtonNext.width;
-        float bioWidth = 32;
-        float chronoWidth = 48;
+        const float bioWidth = 32;
+        const float chronoWidth = 48;
 
         var extendedArrowSize = arrowPadding + arrowWidth;
         var extendedFieldSize = extendedArrowSize * 2;
@@ -75,7 +66,7 @@ public class PanelAge : PanelBase {
             spacing = Mathf.Floor(spacing);
         }
 
-        float fieldHeight = 28;
+        const float fieldHeight = 28;
 
         var saveFont = Text.Font;
         Text.Font = GameFont.Tiny;
@@ -88,23 +79,27 @@ public class PanelAge : PanelBase {
         var top = PanelRect.HalfHeight() - (contentHeight * 0.5f);
         var fieldTop = top + labelHeight;
 
-        RectBiologicalAgeField =
+        _rectBiologicalAgeField =
             new Rect(spacing + extendedArrowSize, fieldTop, bioWidth + extraFieldWidth, fieldHeight);
-        RectChronologicalAgeField = new Rect(RectBiologicalAgeField.xMax + extendedArrowSize +
-                                             spacing + extendedArrowSize, fieldTop, chronoWidth + extraFieldWidth,
+        _rectChronologicalAgeField = new Rect(_rectBiologicalAgeField.xMax + extendedArrowSize +
+                                              spacing + extendedArrowSize, fieldTop, chronoWidth + extraFieldWidth,
             fieldHeight);
 
-        RectBiologicalAgeLabel = new Rect(RectBiologicalAgeField.MiddleX() - (bioLabelSize.x / 2),
-            RectBiologicalAgeField.y - bioLabelSize.y, bioLabelSize.x, bioLabelSize.y);
-        RectChronologicalAgeLabel = new Rect(RectChronologicalAgeField.MiddleX() - (chronoLabelSize.x / 2),
-            RectChronologicalAgeField.y - chronoLabelSize.y, chronoLabelSize.x, chronoLabelSize.y);
+        _rectBiologicalAgeLabel = new Rect(_rectBiologicalAgeField.MiddleX() - (bioLabelSize.x / 2),
+            _rectBiologicalAgeField.y - bioLabelSize.y, bioLabelSize.x, bioLabelSize.y);
+        _rectChronologicalAgeLabel = new Rect(_rectChronologicalAgeField.MiddleX() - (chronoLabelSize.x / 2),
+            _rectChronologicalAgeField.y - chronoLabelSize.y, chronoLabelSize.x, chronoLabelSize.y);
     }
 
     protected override void DrawPanelContent(State state) {
         base.DrawPanelContent(state);
 
-        // Update field values.
         var customPawn = state.CurrentPawn;
+        if (customPawn == null) {
+            return;
+        }
+
+        // Update field values.
         var maxAge = providerAgeLimits.MaxAgeForPawn(customPawn.Pawn);
         var minAge = providerAgeLimits.MinAgeForPawn(customPawn.Pawn);
         chronologicalField.MinValue = customPawn.BiologicalAge;
@@ -114,17 +109,17 @@ public class PanelAge : PanelBase {
         // Age labels.
         Text.Font = GameFont.Tiny;
         GUI.color = Style.ColorText;
-        Widgets.Label(RectBiologicalAgeLabel, "EdB.PC.Panel.Age.Biological".Translate());
-        Widgets.Label(RectChronologicalAgeLabel, "EdB.PC.Panel.Age.Chronological".Translate());
+        Widgets.Label(_rectBiologicalAgeLabel, "EdB.PC.Panel.Age.Biological".Translate());
+        Widgets.Label(_rectChronologicalAgeLabel, "EdB.PC.Panel.Age.Chronological".Translate());
         Text.Font = GameFont.Small;
         GUI.color = Color.white;
 
         // Biological age field.
-        var fieldRect = RectBiologicalAgeField;
+        var fieldRect = _rectBiologicalAgeField;
         biologicalField.Draw(fieldRect, customPawn.BiologicalAge);
 
         // Chronological age field.
-        fieldRect = RectChronologicalAgeField;
+        fieldRect = _rectChronologicalAgeField;
         chronologicalField.Draw(fieldRect, customPawn.ChronologicalAge);
     }
 }

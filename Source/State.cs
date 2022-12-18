@@ -1,69 +1,39 @@
 ﻿using System.Collections.Generic;
-using RimWorld;
 using Verse;
 
 namespace EdB.PrepareCarefully;
 
 public class State {
-    protected CustomPawn currentColonyPawn;
-    protected CustomPawn currentWorldPawn;
+    private readonly List<string> errors = new();
+    private readonly List<string> messages = new();
 
-    protected List<string> errors = new();
-    protected List<string> messages = new();
+    public PagePrepareCarefully? Page { get; set; }
 
-    public Page_PrepareCarefully Page {
-        get;
-        set;
-    }
-
-    public List<CustomPawn> Pawns => PrepareCarefully.Instance.Pawns;
-
-    public CustomPawn CurrentPawn {
-        get => PawnListMode == PawnListMode.ColonyPawnsMaximized ? currentColonyPawn : currentWorldPawn;
+    public CustomPawn? CurrentPawn {
+        get => PawnListMode == PawnListMode.ColonyPawnsMaximized ? CurrentColonyPawn : CurrentWorldPawn;
         set {
             if (PawnListMode == PawnListMode.ColonyPawnsMaximized) {
-                currentColonyPawn = value;
+                CurrentColonyPawn = value;
             }
             else {
-                currentWorldPawn = value;
+                CurrentWorldPawn = value;
             }
         }
     }
 
-    public CustomPawn CurrentColonyPawn {
-        get => currentColonyPawn;
-        set => currentColonyPawn = value;
-    }
+    public CustomPawn? CurrentColonyPawn { get; set; }
 
-    public CustomPawn CurrentWorldPawn {
-        get => currentWorldPawn;
-        set => currentWorldPawn = value;
-    }
+    public CustomPawn? CurrentWorldPawn { get; set; }
 
-    public List<CustomPawn> ColonyPawns => PrepareCarefully.Instance.ColonyPawns;
+    public PawnKindDef? LastSelectedPawnKindDef { get; set; }
 
-    public FactionDef LastSelectedFactionDef {
-        get;
-        set;
-    }
-
-    public PawnKindDef LastSelectedPawnKindDef {
-        get;
-        set;
-    }
-
-    public List<CustomPawn> WorldPawns => PrepareCarefully.Instance.WorldPawns;
-
-    public ITabView CurrentTab {
-        get;
-        set;
-    }
+    public ITabView? CurrentTab { get; set; }
 
     public PawnListMode PawnListMode { get; set; } = PawnListMode.ColonyPawnsMaximized;
 
     public IEnumerable<string> Errors => errors;
 
-    public List<string> MissingWorkTypes { get; set; }
+    public List<string> MissingWorkTypes { get; set; } = new();
 
     public IEnumerable<string> Messages => messages;
 

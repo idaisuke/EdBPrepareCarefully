@@ -23,7 +23,7 @@ public class PanelColonyPawnList : PanelPawnList {
     protected override List<CustomPawn> GetPawnListFromState(State state) {
         // Re-use the same list instead of instantiating a new one every frame.
         pawns.Clear();
-        pawns.AddRange(state.ColonyPawns);
+        pawns.AddRange(PrepareCarefully.Instance.ColonyPawns);
         return pawns;
     }
 

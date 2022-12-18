@@ -17,77 +17,51 @@ public enum SortOrder {
 }
 
 public class PrepareCarefully {
-    public static readonly Version MinimumGameVersion = new(1, 3, 3102);
-    protected static PrepareCarefully instance;
+    public static readonly Version MinimumGameVersion = new(1, 4, 3580);
+    private static PrepareCarefully? _instance;
+    private readonly List<SelectedAnimal> animals = new();
+    private readonly List<SelectedAnimal> animalsToRemove = new();
 
     private readonly Dictionary<CustomPawn, Pawn> copiedPawnToOriginalPawnLookup = new();
 
     private readonly CostDetails cost = new();
+
+    private readonly List<EquipmentSelection> equipment = new();
+    private readonly List<EquipmentSelection> equipmentToRemove = new();
     private readonly Dictionary<Pawn, CustomPawn> originalPawnToCopiedPawnLookup = new();
     private readonly Dictionary<CustomPawn, Pawn> pawnLookup = new();
-    private readonly Dictionary<Pawn, CustomPawn> reversePawnLookup = new();
-    protected bool active;
-    protected AnimalDatabase animalDatabase = null;
-    protected List<SelectedAnimal> animals = new();
-    protected List<SelectedAnimal> animalsToRemove = new();
 
-    protected List<Pawn> colonists = new();
-    protected Configuration config = new();
-    protected CostCalculator costCalculator;
-
-    protected Dictionary<CustomPawn, Pawn> customPawnToOriginalPawnMap = new();
-
-    protected List<EquipmentSelection> equipment = new();
-
-    protected EquipmentDatabase equipmentDatabase;
-    protected List<EquipmentSelection> equipmentToRemove = new();
-    protected string filename = "";
-    protected Dictionary<Pawn, CustomPawn> originalPawnToCustomPawnMap = new();
-
-    protected List<CustomPawn> pawns = new();
-    protected List<SelectedPet> pets = new();
-    protected List<SelectedPet> petsToRemove = new();
-    protected Randomizer randomizer = new();
-    protected RelationshipManager relationshipManager;
+    private readonly List<SelectedPet> pets = new();
+    private readonly List<SelectedPet> petsToRemove = new();
 
     // Use this set to keep track of which scenario parts we're replacing with our custom ones
-    public HashSet<ScenPart> ReplacedScenarioParts = new();
-    protected State state = new();
+    public readonly HashSet<ScenPart> ReplacedScenarioParts = new();
+    private readonly Dictionary<Pawn, CustomPawn> reversePawnLookup = new();
 
-    public PrepareCarefully() {
+    private CostCalculator costCalculator;
+
+    private EquipmentDatabase equipmentDatabase;
+
+    private PrepareCarefully() {
         NameSortOrder = SortOrder.Ascending;
         CostSortOrder = SortOrder.Ascending;
         SortField = SortField.Name;
     }
 
-    public static PrepareCarefully Instance {
-        get {
-            if (instance == null) {
-                instance = new PrepareCarefully();
-            }
+    public static PrepareCarefully Instance => _instance ??= new PrepareCarefully();
 
-            return instance;
-        }
-    }
+    public Configuration Config { get; set; } = new();
 
-    public Configuration Config {
-        get => config;
-        set => config = value;
-    }
+    public State State { get; private set; } = new();
 
-    public State State => state;
-
-    public static Scenario VanillaFriendlyScenario {
-        get;
-        set;
-    }
+    public static Scenario? VanillaFriendlyScenario { get; set; }
 
     public Providers Providers {
         get;
         set;
     }
 
-    public RelationshipManager RelationshipManager => relationshipManager;
+    public RelationshipManager RelationshipManager { get; private set; }
 
     public SortField SortField { get; set; }
     public SortOrder NameSortOrder { get; set; }
@@ -97,25 +71,19 @@ public class PrepareCarefully {
 
     public int PointsRemaining => StartingPoints - (int)Cost.total;
 
-    public bool Active {
-        get => active;
-        set => active = value;
-    }
+    public bool Active { get; set; }
 
-    public string Filename {
-        get => filename;
-        set => filename = value;
-    }
+    public string Filename { get; set; } = "";
 
-    public List<CustomPawn> Pawns => pawns;
+    public List<CustomPawn> Pawns { get; } = new();
 
-    public List<CustomPawn> ColonyPawns => pawns.FindAll(pawn => { return pawn.Type == CustomPawnType.Colonist; });
+    public List<CustomPawn> ColonyPawns => Pawns.FindAll(pawn => { return pawn.Type == CustomPawnType.Colonist; });
 
-    public List<CustomPawn> WorldPawns => pawns.FindAll(pawn => { return pawn.Type == CustomPawnType.World; });
+    public List<CustomPawn> WorldPawns => Pawns.FindAll(pawn => { return pawn.Type == CustomPawnType.World; });
 
-    public List<CustomPawn> HiddenPawns => pawns.FindAll(pawn => { return pawn.Type == CustomPawnType.Hidden; });
+    public List<CustomPawn> HiddenPawns => Pawns.FindAll(pawn => { return pawn.Type == CustomPawnType.Hidden; });
 
-    public List<CustomPawn> TemporaryPawns => pawns.FindAll(pawn => { return pawn.Type == CustomPawnType.Temporary; });
+    public List<CustomPawn> TemporaryPawns => Pawns.FindAll(pawn => { return pawn.Type == CustomPawnType.Temporary; });
 
     public EquipmentDatabase EquipmentDatabase {
         get {
@@ -154,13 +122,13 @@ public class PrepareCarefully {
                 costCalculator = new CostCalculator();
             }
 
-            costCalculator.Calculate(cost, pawns, equipment, animals);
+            costCalculator.Calculate(cost, Pawns, equipment, animals);
             return cost;
         }
     }
 
     public static void RemoveInstance() {
-        instance = null;
+        _instance = null;
     }
 
     public static void ClearVanillaFriendlyScenario() {
@@ -194,7 +162,7 @@ public class PrepareCarefully {
         Providers = new Providers();
         equipmentDatabase = new EquipmentDatabase();
         costCalculator = new CostCalculator();
-        pawns.Clear();
+        Pawns.Clear();
         equipment.Clear();
         animals.Clear();
         pets.Clear();
@@ -206,10 +174,10 @@ public class PrepareCarefully {
         InitializeProviders();
         PawnColorUtils.InitializeColors();
         InitializePawns();
-        InitializeRelationshipManager(pawns);
+        InitializeRelationshipManager(Pawns);
         InitializeDefaultEquipment();
         StartingPoints = (int)Cost.total;
-        state = new State();
+        State = new State();
     }
 
     protected void InitializeProviders() {
@@ -398,12 +366,12 @@ public class PrepareCarefully {
     }
 
     public void ClearPawns() {
-        pawns.Clear();
+        Pawns.Clear();
     }
 
     public void AddPawn(CustomPawn customPawn) {
         PreloadPawnEquipment(customPawn.Pawn);
-        pawns.Add(customPawn);
+        Pawns.Add(customPawn);
     }
 
     protected void PreloadPawnEquipment(Pawn pawn) {
@@ -429,7 +397,7 @@ public class PrepareCarefully {
     }
 
     public void RemovePawn(CustomPawn customPawn) {
-        pawns.Remove(customPawn);
+        Pawns.Remove(customPawn);
     }
 
     public Pawn FindPawn(CustomPawn pawn) {
@@ -626,8 +594,8 @@ public class PrepareCarefully {
     }
 
     public void InitializeRelationshipManager(List<CustomPawn> pawns) {
-        relationshipManager = new RelationshipManager();
-        relationshipManager.InitializeWithPawns(pawns);
+        RelationshipManager = new RelationshipManager();
+        RelationshipManager.InitializeWithPawns(pawns);
     }
 
     public class PawnPayload : IExposable {

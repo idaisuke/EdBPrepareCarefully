@@ -76,7 +76,7 @@ public class PawnLoaderV5 {
         bodyPartReplacements.Add(name, new ReplacementBodyPart(def, index));
     }
 
-    public CustomPawn Load(PrepareCarefully loadout, string name) {
+    public CustomPawn Load(string name) {
         var pawnRecord = new SaveRecordPawnV5();
         var modString = "";
         var version = "";

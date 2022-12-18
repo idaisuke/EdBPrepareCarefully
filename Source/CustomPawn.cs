@@ -59,10 +59,6 @@ public class CustomPawn {
     protected Dictionary<SkillDef, int> skillLevelModifiers = new();
     protected ThingCache thingCache = new();
 
-    public CustomPawn() {
-        GenerateId();
-    }
-
     public CustomPawn(Pawn pawn) {
         GenerateId();
         InitializeWithPawn(pawn);
@@ -174,15 +170,14 @@ public class CustomPawn {
         set => lastSelectedAdulthoodBackstory = value;
     }
 
-    public NameTriple Name {
+    public NameTriple? Name {
         get => pawn.Name as NameTriple;
         set => pawn.Name = value;
     }
 
     public string FirstName {
         get {
-            var nameTriple = pawn.Name as NameTriple;
-            if (nameTriple != null) {
+            if (pawn.Name is NameTriple nameTriple) {
                 return nameTriple.First;
             }
 

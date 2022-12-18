@@ -189,8 +189,8 @@ public class ProviderFactions {
         });
     }
 
-    public CustomFaction FindRandomCustomFactionByDef(FactionDef def) {
-        return RandomCustomFactions.FirstOrDefault(faction => { return faction.Def == def; });
+    public CustomFaction? FindRandomCustomFactionByDef(FactionDef def) {
+        return RandomCustomFactions.FirstOrDefault(faction => faction.Def == def);
     }
 
     public void AddCustomFaction(CustomFaction customFaction) {

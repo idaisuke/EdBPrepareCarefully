@@ -10,26 +10,26 @@ public class TabViewPawns : TabViewBase {
         InitializePanels(largeUI);
     }
 
-    public bool LargeUI { get; set; }
-    public PanelColonyPawnList PanelColonyPawns { get; set; }
-    public PanelWorldPawnList PanelWorldPawns { get; set; }
-    public PanelRandomize PanelRandomize { get; set; }
-    public PanelName PanelName { get; set; }
-    public PanelAge PanelAge { get; set; }
-    public PanelAppearance PanelAppearance { get; set; }
-    public PanelSkills PanelSkills { get; set; }
-    public PanelIncapableOf PanelIncapable { get; set; }
-    public PanelLoadSave PanelSaveLoad { get; set; }
-    public PanelFavoriteColor PanelFavoriteColor { get; set; }
-    public PanelBackstory PanelBackstory { get; set; }
-    public PanelTraits PanelTraits { get; set; }
-    public PanelHealth PanelHealth { get; set; }
+    private bool LargeUI { get; }
+    public PanelColonyPawnList PanelColonyPawns { get; private set; }
+    public PanelWorldPawnList PanelWorldPawns { get; private set; }
+    public PanelRandomize PanelRandomize { get; private set; }
+    public PanelName PanelName { get; private set; }
+    public PanelAge PanelAge { get; private set; }
+    public PanelAppearance PanelAppearance { get; private set; }
+    public PanelSkills PanelSkills { get; private set; }
+    private PanelIncapableOf PanelIncapable { get; set; }
+    public PanelLoadSave PanelSaveLoad { get; private set; }
+    public PanelFavoriteColor PanelFavoriteColor { get; private set; }
+    public PanelBackstory PanelBackstory { get; private set; }
+    public PanelTraits PanelTraits { get; private set; }
+    public PanelHealth PanelHealth { get; private set; }
     public PanelFaction PanelFaction { get; set; }
     public PanelIdeo PanelIdeo { get; set; }
-    public PanelAbilities PanelAbilities { get; set; }
-    public PanelScrollingContent PanelColumn1 { get; set; }
+    public PanelAbilities PanelAbilities { get; private set; }
+    public PanelScrollingContent? PanelColumn1 { get; private set; }
 
-    public PanelScrollingContent PanelColumn2 { get; set; }
+    public PanelScrollingContent? PanelColumn2 { get; private set; }
 
     //public PanelModuleAge PanelAge { get; set; }
     public PanelTitles PanelTitles { get; set; }
@@ -64,7 +64,7 @@ public class TabViewPawns : TabViewBase {
     }
 
     public void OneColumnLayout() {
-        PanelColumn1 = new PanelScrollingContent { Modules = new List<PanelModule>() };
+        PanelColumn1 = new PanelScrollingContent();
         //PanelColumn1.Modules.Add(PanelAge);
         PanelColumn1.Modules.Add(PanelFaction);
         if (ModsConfig.IdeologyActive) {
@@ -106,7 +106,7 @@ public class TabViewPawns : TabViewBase {
             PanelSaveLoad.Draw(state);
             PanelAge.Draw(state);
             PanelAppearance.Draw(state);
-            PanelColumn1.Draw(state);
+            PanelColumn1?.Draw(state);
             PanelColumn2?.Draw(state);
             PanelSkills.Draw(state);
             PanelIncapable.Draw(state);
@@ -170,7 +170,7 @@ public class TabViewPawns : TabViewBase {
 
         float columnSize2 = 304;
         // Faction, Backstory, Traits and Health
-        PanelColumn1.Resize(new Rect(x, top, columnSize2, rect.height - PanelName.PanelRect.height - panelMargin.y));
+        PanelColumn1?.Resize(new Rect(x, top, columnSize2, rect.height - PanelName.PanelRect.height - panelMargin.y));
         x += columnSize2 + panelMargin.x;
         if (LargeUI && PanelColumn2 != null) {
             PanelColumn2.Resize(new Rect(x, top, columnSize2,

@@ -1,3 +1,7 @@
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Local
+// ReSharper disable UnusedType.Global
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,17 +25,18 @@ internal static class Main {
             patchedMethods.Add((m.DeclaringType, m.Name));
         }
 
-        if (patchedMethods.Count != 3
-            || !patchedMethods.Contains((typeof(Page_ConfigureStartingPawns), "PreOpen"))
-            || !patchedMethods.Contains((typeof(Page_ConfigureStartingPawns), "DoWindowContents"))
-            || !patchedMethods.Contains((typeof(Game), "InitNewGame"))
-           ) {
-            var methodsMessage = String.Join(", ",
-                harmony.GetPatchedMethods().Select(i => i.DeclaringType + "." + i.Name));
-            Logger.Warning(
-                "Did not patch all of the expected methods.  The following patched methods were found: "
-                + (!methodsMessage.NullOrEmpty() ? methodsMessage : "none"));
+        if (patchedMethods.Count == 3
+            && patchedMethods.Contains((typeof(Page_ConfigureStartingPawns), "PreOpen"))
+            && patchedMethods.Contains((typeof(Page_ConfigureStartingPawns), "DoWindowContents"))
+            && patchedMethods.Contains((typeof(Game), "InitNewGame"))) {
+            return;
         }
+
+        var methodsMessage = String.Join(", ",
+            harmony.GetPatchedMethods().Select(i => i.DeclaringType + "." + i.Name));
+        Logger.Warning(
+            "Did not patch all of the expected methods.  The following patched methods were found: "
+            + (!methodsMessage.NullOrEmpty() ? methodsMessage : "none"));
     }
 }
 
@@ -53,10 +58,12 @@ internal class ReplaceScenarioPatch {
     private static void Postfix() {
         // After we've initialized the new game, swap in the vanilla-friendly version of the scenario so that the game save
         // doesn't include any Prepare Carefully-specific scene parts.
-        if (PrepareCarefully.VanillaFriendlyScenario != null) {
-            Current.Game.Scenario = PrepareCarefully.VanillaFriendlyScenario;
-            PrepareCarefully.ClearVanillaFriendlyScenario();
+        if (PrepareCarefully.VanillaFriendlyScenario == null) {
+            return;
         }
+
+        Current.Game.Scenario = PrepareCarefully.VanillaFriendlyScenario;
+        PrepareCarefully.ClearVanillaFriendlyScenario();
     }
 }
 
@@ -69,46 +76,36 @@ internal class PrepareCarefullyButtonPatch {
         var num = rect.height + 45f;
         var rect4 = new Rect(rect.x + (rect.width / 2f) - (BottomButSize.x / 2f), num, BottomButSize.x,
             BottomButSize.y);
-        if (Widgets.ButtonText(rect4, "EdB.PC.Page.Button.PrepareCarefully".Translate(), true, false)) {
-            // Version check
-            if (VersionControl.CurrentVersion < PrepareCarefully.MinimumGameVersion) {
-                Find.WindowStack.Add(new DialogInitializationError(null));
-                SoundDefOf.ClickReject.PlayOneShot(null);
-                Logger.Warning("Prepare Carefully failed to initialize because it requires at least version " +
-                               PrepareCarefully.MinimumGameVersion
-                               + " of RimWorld.  You are running " + VersionControl.CurrentVersionString);
-                return;
-            }
 
-            try {
-                ReflectionCache.Instance.Initialize();
+        if (!Widgets.ButtonText(rect4, "EdB.PC.Page.Button.PrepareCarefully".Translate(), true, false)) {
+            return;
+        }
 
-                var prepareCarefully = PrepareCarefully.Instance;
-                if (prepareCarefully == null) {
-                    Logger.Error(
-                        "Could not open Prepare Carefully screen, because we failed to get the Prepare Carefully singleton.");
-                    return;
-                }
+        // Version check
+        if (VersionControl.CurrentVersion < PrepareCarefully.MinimumGameVersion) {
+            Find.WindowStack.Add(new DialogInitializationError());
+            SoundDefOf.ClickReject.PlayOneShot(null);
+            Logger.Warning("Prepare Carefully failed to initialize because it requires at least version " +
+                           PrepareCarefully.MinimumGameVersion
+                           + " of RimWorld.  You are running " + VersionControl.CurrentVersionString);
+            return;
+        }
 
-                prepareCarefully.Initialize();
-                prepareCarefully.OriginalPage = __instance;
-                var page = new Page_PrepareCarefully();
+        try {
+            ReflectionCache.Instance.Initialize();
 
-                var state = prepareCarefully.State;
-                if (state == null) {
-                    Logger.Error(
-                        "Could not open Prepare Carefully screen, because the Prepare Carefully state was null.");
-                    return;
-                }
-
-                state.Page = page;
-                Find.WindowStack.Add(page);
-            }
-            catch (Exception e) {
-                Find.WindowStack.Add(new DialogInitializationError(e));
-                SoundDefOf.ClickReject.PlayOneShot(null);
-                throw new InitializationException("Prepare Carefully failed to initialize", e);
-            }
+            var prepareCarefully = PrepareCarefully.Instance;
+            prepareCarefully.Initialize();
+            prepareCarefully.OriginalPage = __instance;
+            var state = prepareCarefully.State;
+            var page = new PagePrepareCarefully(state);
+            state.Page = page;
+            Find.WindowStack.Add(page);
+        }
+        catch (Exception e) {
+            Find.WindowStack.Add(new DialogInitializationError());
+            SoundDefOf.ClickReject.PlayOneShot(null);
+            throw new InitializationException("Prepare Carefully failed to initialize", e);
         }
     }
 }

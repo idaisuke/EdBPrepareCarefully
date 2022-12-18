@@ -23,7 +23,7 @@ public class PanelWorldPawnList : PanelPawnList {
     protected override List<CustomPawn> GetPawnListFromState(State state) {
         // Re-use the same list instead of instantiating a new one every frame.
         pawns.Clear();
-        pawns.AddRange(state.WorldPawns);
+        pawns.AddRange(PrepareCarefully.Instance.WorldPawns);
         return pawns;
     }
 

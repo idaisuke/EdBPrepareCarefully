@@ -75,7 +75,7 @@ namespace EdB.PrepareCarefully {
         public void StartGame() {
             if (CanDoNext()) {
                 PrepareCarefully.Instance.Active = true;
-                PrepareCarefully.Instance.State.Page.Close(false);
+                PrepareCarefully.Instance.State.Page?.Close(false);
                 PrepareCarefully.Instance.State.Page = null;
                 PrepareGame();
                 PrepareCarefully.Instance.DoNextInBasePage();
@@ -93,8 +93,8 @@ namespace EdB.PrepareCarefully {
             bool result = PresetLoader.LoadFromFile(PrepareCarefully.Instance, name);
             if (result) {
                 state.AddMessage("EdB.PC.Dialog.Preset.Loaded".Translate(name));
-                state.CurrentColonyPawn = state.ColonyPawns.FirstOrDefault();
-                state.CurrentWorldPawn = state.WorldPawns.FirstOrDefault();
+                state.CurrentColonyPawn = PrepareCarefully.Instance.ColonyPawns.FirstOrDefault();
+                state.CurrentWorldPawn = PrepareCarefully.Instance.WorldPawns.FirstOrDefault();
             }
 
             subcontrollerCharacters.CheckPawnCapabilities();
@@ -147,7 +147,7 @@ namespace EdB.PrepareCarefully {
 
         protected void PrepareColonists() {
             List<Pawn> colonists = new List<Pawn>();
-            foreach (var customPawn in state.Pawns) {
+            foreach (var customPawn in PrepareCarefully.Instance.Pawns) {
                 if (customPawn.Type == CustomPawnType.Colonist) {
                     customPawn.Pawn.SetFactionDirect(Faction.OfPlayer);
                     if (customPawn.Pawn.workSettings == null) {
@@ -164,7 +164,7 @@ namespace EdB.PrepareCarefully {
         }
 
         protected void PrepareWorldPawns() {
-            foreach (var customPawn in state.Pawns) {
+            foreach (var customPawn in PrepareCarefully.Instance.Pawns) {
                 if (customPawn.Type == CustomPawnType.World) {
                     AddPawnToWorld(customPawn);
                 }

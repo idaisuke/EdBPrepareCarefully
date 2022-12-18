@@ -1,4 +1,3 @@
-using System;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -6,10 +5,7 @@ using Verse;
 namespace EdB.PrepareCarefully;
 
 public class DialogInitializationError : Window {
-    private Exception exception;
-
-    public DialogInitializationError(Exception exception) {
-        this.exception = exception;
+    public DialogInitializationError() {
         forcePause = true;
         absorbInputAroundWindow = true;
         closeOnClickedOutside = false;
