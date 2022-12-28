@@ -102,9 +102,9 @@ public class PanelAge : PanelBase {
         // Update field values.
         var maxAge = providerAgeLimits.MaxAgeForPawn(customPawn.Pawn);
         var minAge = providerAgeLimits.MinAgeForPawn(customPawn.Pawn);
-        chronologicalField.MinValue = customPawn.BiologicalAge;
+        chronologicalField.MinValue = minAge;
         biologicalField.MinValue = minAge;
-        biologicalField.MaxValue = customPawn.ChronologicalAge < maxAge ? customPawn.ChronologicalAge : maxAge;
+        biologicalField.MaxValue = maxAge;
 
         // Age labels.
         Text.Font = GameFont.Tiny;

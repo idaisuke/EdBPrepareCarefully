@@ -1,0 +1,298 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- CHANGE NOTES -->
+<!-- v1.3.9 -->
+<!-- ADDED: EdB.PC.Dialog.Abilities.Header -->
+<!-- ADDED: EdB.PC.Dialog.Titles.Header -->
+<!-- ADDED: EdB.PC.Panel.Abilities.None -->
+<!-- ADDED: EdB.PC.Panel.Titles.None -->
+<!-- ADDED: EdB.PC.Panel.Header.None -->
+
+<!-- v1.3.6 -->
+<!-- REMOVED: EdB.PC.Panel.Traits.Warning.TooManyTraits -->
+<!-- v1.3.1 -->
+<!-- NEW: EdB.PC.Dialog.FavoriteColor.Header -->
+<!-- NEW: EdB.PC.Panel.PawnList.Add -->
+<!-- NEW: EdB.PC.Panel.PawnList.Load -->
+<!-- NEW: EdB.PC.Pawn.PawnLayer.Beard -->
+<!-- NEW: EdB.PC.Pawn.PawnLayer.EyeCovering -->
+<!-- NEW: EdB.PC.Pawn.PawnLayer.FaceTattoo -->
+<!-- NEW: EdB.PC.Pawn.PawnLayer.BodyTattoo -->
+
+<!-- v1.1.1 -->
+<!-- UPDATED: EdB.PC.Error.Initialization -->
+
+<LanguageData>
+    <EdB.PC.AddParentChild.Header.AddParent>親を追加</EdB.PC.AddParentChild.Header.AddParent>
+    <EdB.PC.AddParentChild.Error.ParentRequired>親を選択してください</EdB.PC.AddParentChild.Error.ParentRequired>
+    <EdB.PC.AddParentChild.Header.AddChild>子供を追加</EdB.PC.AddParentChild.Header.AddChild>
+    <EdB.PC.AddParentChild.Error.ChildRequired>子供を選択してください</EdB.PC.AddParentChild.Error.ChildRequired>
+    <EdB.PC.AddParentChild.Header.SelectColonist>入植者を選択</EdB.PC.AddParentChild.Header.SelectColonist>
+    <EdB.PC.AddParentChild.Header.SelectWorldPawn>ワールドのキャラを選択</EdB.PC.AddParentChild.Header.SelectWorldPawn>
+    <EdB.PC.AddParentChild.Header.CreateTemporaryPawn>人間関係を持つ一時的なポーンを作成
+    </EdB.PC.AddParentChild.Header.CreateTemporaryPawn>
+    <EdB.PC.AddParentChild.NewHiddenCharacter>一時的なキャラを新規追加</EdB.PC.AddParentChild.NewHiddenCharacter>
+    <EdB.PC.AddParentChild.Temporary>一時的</EdB.PC.AddParentChild.Temporary>
+    <EdB.PC.AddParentChild.Colony>コロニー</EdB.PC.AddParentChild.Colony>
+    <EdB.PC.AddParentChild.World>ワールド</EdB.PC.AddParentChild.World>
+
+    <EdB.PC.AddRelationship.Header.Relationship>人間関係を選択</EdB.PC.AddRelationship.Header.Relationship>
+    <EdB.PC.AddRelationship.Header.Source>キャラを選択</EdB.PC.AddRelationship.Header.Source>
+    <EdB.PC.AddRelationship.Header.Target>目標キャラ選択</EdB.PC.AddRelationship.Header.Target>
+    <EdB.PC.AddRelationship.Error.RelationshipRequired>関係を選択して下さい
+    </EdB.PC.AddRelationship.Error.RelationshipRequired>
+    <EdB.PC.AddRelationship.Error.SourceRequired>キャラを選択して下さい</EdB.PC.AddRelationship.Error.SourceRequired>
+    <EdB.PC.AddRelationship.Error.TargetRequired>キャラを選択して下さい</EdB.PC.AddRelationship.Error.TargetRequired>
+
+    <EdB.PC.Animals.LabelWithGender>{0}, {1}</EdB.PC.Animals.LabelWithGender>
+    <EdB.PC.Animals.LabelWithoutGender>{0}</EdB.PC.Animals.LabelWithoutGender>
+
+    <EdB.PC.BodyParts.WholeBody>全身</EdB.PC.BodyParts.WholeBody>
+
+    <EdB.PC.Common.Add>追加</EdB.PC.Common.Add>
+    <EdB.PC.Common.Next>次</EdB.PC.Common.Next>
+    <EdB.PC.Common.NoOptionSelected>なし</EdB.PC.Common.NoOptionSelected>
+    <EdB.PC.Common.NoOptionAvailable>なし</EdB.PC.Common.NoOptionAvailable>
+    <EdB.PC.Common.Cancel>キャンセル</EdB.PC.Common.Cancel>
+    <EdB.PC.Common.Close>閉じる</EdB.PC.Common.Close>
+    <EdB.PC.Common.Confirm>確認</EdB.PC.Common.Confirm>
+    <EdB.PC.Common.Default>デフォルト</EdB.PC.Common.Default>
+    <EdB.PC.Common.Select>選択</EdB.PC.Common.Select>
+
+    <EdB.PC.Dialog.Abilities.Header>超能力選択</EdB.PC.Dialog.Abilities.Header>
+
+    <EdB.PC.Dialog.Backstory.Filter.Add>フィルタ追加</EdB.PC.Dialog.Backstory.Filter.Add>
+    <EdB.PC.Dialog.Backstory.Filter.NoDisabledWorkTypes>無効な作業タイプはありません
+    </EdB.PC.Dialog.Backstory.Filter.NoDisabledWorkTypes>
+    <EdB.PC.Dialog.Backstory.Filter.NoSkillPenalties>スキルペナルティ無し</EdB.PC.Dialog.Backstory.Filter.NoSkillPenalties>
+    <EdB.PC.Dialog.Backstory.Filter.SkillBonus>ボーナス：{0} +{1}</EdB.PC.Dialog.Backstory.Filter.SkillBonus>
+    <EdB.PC.Dialog.Backstory.Filter.SkillBonusFull>スキルボーナス：{0}、+{1} またはそれ以上
+    </EdB.PC.Dialog.Backstory.Filter.SkillBonusFull>
+    <EdB.PC.Dialog.Backstory.Filter.MatchesFaction>派閥バックストーリーのみ</EdB.PC.Dialog.Backstory.Filter.MatchesFaction>
+
+    <EdB.PC.Dialog.BodyPart.Header>場所を選択</EdB.PC.Dialog.BodyPart.Header>
+    <EdB.PC.Dialog.BodyPart.Error.Required>場所を選択して下さい</EdB.PC.Dialog.BodyPart.Error.Required>
+
+    <EdB.PC.Dialog.Faction.ChooseFaction>派閥を選択</EdB.PC.Dialog.Faction.ChooseFaction>
+    <EdB.PC.Dialog.Faction.LeaderFaction>指導者：{0}</EdB.PC.Dialog.Faction.LeaderFaction>
+    <EdB.PC.Dialog.Faction.NumberedFaction>{1}：{0}</EdB.PC.Dialog.Faction.NumberedFaction>
+    <EdB.PC.Dialog.Faction.Random>ランダム</EdB.PC.Dialog.Faction.Random>
+    <EdB.PC.Dialog.Faction.RandomFaction>ランダム：{0}</EdB.PC.Dialog.Faction.RandomFaction>
+    <EdB.PC.Dialog.Faction.SelectLeaderFaction>このキャラクターを指定した派閥の指導者にします
+    </EdB.PC.Dialog.Faction.SelectLeaderFaction>
+    <EdB.PC.Dialog.Faction.SelectRandomFaction>このキャラクターをランダムな派閥に配置します</EdB.PC.Dialog.Faction.SelectRandomFaction>
+    <EdB.PC.Dialog.Faction.SelectSpecificFaction>このキャラクターを指定した派閥に配置します
+    </EdB.PC.Dialog.Faction.SelectSpecificFaction>
+
+    <EdB.PC.Dialog.FavoriteColor.Header>好きな色を選択</EdB.PC.Dialog.FavoriteColor.Header>
+
+    <EdB.PC.Dialog.Implant.Alert>別の選択と競合するためにインストールされないインプラントを少なくとも1つ選択しました：\n{0}</EdB.PC.Dialog.Implant.Alert>
+    <EdB.PC.Dialog.Implant.Alert.Item>- {0}, {1}</EdB.PC.Dialog.Implant.Alert.Item>
+    <EdB.PC.Dialog.Implant.Button.Confirm>適用</EdB.PC.Dialog.Implant.Button.Confirm>
+    <EdB.PC.Dialog.Implant.Conflict>このインプラントは、以下のものと衝突するので取り付けられません：\n\n- {0}, {1}
+    </EdB.PC.Dialog.Implant.Conflict>
+    <EdB.PC.Dialog.Implant.Header>埋め込むインプラントを選択する</EdB.PC.Dialog.Implant.Header>
+
+    <EdB.PC.Dialog.Injury.Header>健康状態を選択</EdB.PC.Dialog.Injury.Header>
+    <EdB.PC.Dialog.Injury.Error.Required>健康状態を選択して下さい</EdB.PC.Dialog.Injury.Error.Required>
+    <EdB.PC.Dialog.Injury.OldInjury.Label>{0} ({1})</EdB.PC.Dialog.Injury.OldInjury.Label>
+
+    <EdB.PC.Dialog.PawnPreset.Button.Load>ロード</EdB.PC.Dialog.PawnPreset.Button.Load>
+    <EdB.PC.Dialog.PawnPreset.Button.Save>セーブ</EdB.PC.Dialog.PawnPreset.Button.Save>
+    <EdB.PC.Dialog.PawnPreset.DeleteTooltip>入植者を削除する</EdB.PC.Dialog.PawnPreset.DeleteTooltip>
+    <EdB.PC.Dialog.PawnPreset.ConfirmDelete>本当に入植者を削除しますか？</EdB.PC.Dialog.PawnPreset.ConfirmDelete>
+    <EdB.PC.Dialog.PawnPreset.Loaded>入植者:{0}をロードしました</EdB.PC.Dialog.PawnPreset.Loaded>
+    <EdB.PC.Dialog.PawnPreset.Error.Failed>入植者をロードできませんでした。必要な全てのModが有効か確認して下さい。
+    </EdB.PC.Dialog.PawnPreset.Error.Failed>
+    <EdB.PC.Dialog.PawnPreset.Error.PreAlpha13NotSupported>保存されたプレアルファ版の入植者はサポートされていません。
+    </EdB.PC.Dialog.PawnPreset.Error.PreAlpha13NotSupported>
+
+    <EdB.PC.Dialog.Preset.Button.Load>プリセットをロード</EdB.PC.Dialog.Preset.Button.Load>
+    <EdB.PC.Dialog.Preset.Button.Save>プリセットをセーブ</EdB.PC.Dialog.Preset.Button.Save>
+    <EdB.PC.Dialog.Preset.ConfirmDelete>本当にプリセットを削除しますか?</EdB.PC.Dialog.Preset.ConfirmDelete>
+    <EdB.PC.Dialog.Preset.DeleteTooltip>このプリセットを削除する</EdB.PC.Dialog.Preset.DeleteTooltip>
+    <EdB.PC.Dialog.Preset.Error.EquipmentFailed>プリセットから装備を読み込めませんでした。</EdB.PC.Dialog.Preset.Error.EquipmentFailed>
+    <EdB.PC.Dialog.Preset.Error.Failed>プリセットから入植者をロードできませんでした。必要な全てのModが有効か確認して下さい。
+    </EdB.PC.Dialog.Preset.Error.Failed>
+    <EdB.PC.Dialog.Preset.Error.PartialSaveFailure>プリセットをセーブする際に問題が発生しました。一部のカスタマイズは含まれていません。
+    </EdB.PC.Dialog.Preset.Error.PartialSaveFailure>
+    <EdB.PC.Dialog.Preset.Error.PreAlpha13NotSupported>保存されたプレアルファ版のプリセットはサポートされていません。
+    </EdB.PC.Dialog.Preset.Error.PreAlpha13NotSupported>
+    <EdB.PC.Dialog.Preset.Error.RelationshipFailed>プリセットからカスタムした人間関係をロードできませんでした
+    </EdB.PC.Dialog.Preset.Error.RelationshipFailed>
+    <EdB.PC.Dialog.Preset.Error.SaveFailed>セーブ中に問題が発生しました。プリセットをロードできない場合があります。
+    </EdB.PC.Dialog.Preset.Error.SaveFailed>
+    <EdB.PC.Dialog.Preset.Error.ThingDefFailed>完全にはプリセットをロードできませんでした。必要な全てのModが有効か確認して下さい。
+    </EdB.PC.Dialog.Preset.Error.ThingDefFailed>
+    <EdB.PC.Dialog.Preset.Error.NoCharacter>セーブされたキャラクターを読み込めませんでした。必要なすべてのMODが有効であることを確認してください。
+    </EdB.PC.Dialog.Preset.Error.NoCharacter>
+    <EdB.PC.Dialog.Preset.Loaded>プリセット:{0}をロードしました</EdB.PC.Dialog.Preset.Loaded>
+
+    <EdB.PC.Dialog.Severity.Header>症状の段階を選択する</EdB.PC.Dialog.Severity.Header>
+    <EdB.PC.Dialog.Severity.Error.Required>症状の段階を選択して下さい</EdB.PC.Dialog.Severity.Error.Required>
+    <EdB.PC.Dialog.Severity.OldInjury.Label.2>2 ダメージ</EdB.PC.Dialog.Severity.OldInjury.Label.2>
+    <EdB.PC.Dialog.Severity.OldInjury.Label.3>3 ダメージ</EdB.PC.Dialog.Severity.OldInjury.Label.3>
+    <EdB.PC.Dialog.Severity.OldInjury.Label.4>4 ダメージ</EdB.PC.Dialog.Severity.OldInjury.Label.4>
+    <EdB.PC.Dialog.Severity.OldInjury.Label.5>5 ダメージ</EdB.PC.Dialog.Severity.OldInjury.Label.5>
+    <EdB.PC.Dialog.Severity.OldInjury.Label.6>6 ダメージ</EdB.PC.Dialog.Severity.OldInjury.Label.6>
+    <EdB.PC.Dialog.Severity.Stage.Label.>{0} {1}</EdB.PC.Dialog.Severity.Stage.Label.>
+
+    <EdB.PC.Dialog.Titles.Header>爵位を追加</EdB.PC.Dialog.Titles.Header>
+
+    <EdB.PC.Dialog.UnrecoverableError.Header>回復不可能なエラー</EdB.PC.Dialog.UnrecoverableError.Header>
+    <EdB.PC.Dialog.UnrecoverableError.Message>何かの問題で、Prepare Carefullyは復帰できませんでした。次のエラーメッセージは、問題の特定に役立ちます
+        :\n\n「{0}」
+    </EdB.PC.Dialog.UnrecoverableError.Message>
+
+    <EdB.PC.Equipment.AnimalLabel>{0} {1}</EdB.PC.Equipment.AnimalLabel>
+    <EdB.PC.Equipment.Type.Animals>ペット</EdB.PC.Equipment.Type.Animals>
+    <EdB.PC.Equipment.Type.Apparel>衣服</EdB.PC.Equipment.Type.Apparel>
+    <EdB.PC.Equipment.Type.Buildings>家具</EdB.PC.Equipment.Type.Buildings>
+    <EdB.PC.Equipment.Type.Food>食物/ビール</EdB.PC.Equipment.Type.Food>
+    <EdB.PC.Equipment.Type.Medical>薬/ドラッグ/義肢</EdB.PC.Equipment.Type.Medical>
+    <EdB.PC.Equipment.Type.Resources>物品/原材料</EdB.PC.Equipment.Type.Resources>
+    <EdB.PC.Equipment.Type.Weapons>武器</EdB.PC.Equipment.Type.Weapons>
+    <EdB.PC.Equipment.LoadingProgress.Initializing>初期化中...</EdB.PC.Equipment.LoadingProgress.Initializing>
+    <EdB.PC.Equipment.LoadingProgress.StuffDefs>材料を処理中...</EdB.PC.Equipment.LoadingProgress.StuffDefs>
+    <EdB.PC.Equipment.LoadingProgress.ThingDefs>アイテムを処理中...</EdB.PC.Equipment.LoadingProgress.ThingDefs>
+    <EdB.PC.Equipment.LoadingProgress.Finished>処理完了</EdB.PC.Equipment.LoadingProgress.Finished>
+
+    <EdB.PC.Error.NotEnoughPoints>選択されたポイントが多すぎます。</EdB.PC.Error.NotEnoughPoints>
+    <EdB.PC.Error.NotEnoughColonists1>入植者は最低でも一人必要です。</EdB.PC.Error.NotEnoughColonists1>
+    <EdB.PC.Error.NotEnoughColonists>最低でも{0}人の入植者が必要です。</EdB.PC.Error.NotEnoughColonists>
+    <EdB.PC.Error.GameVersion>
+        EdB-Prepare-Carefullyは初期化に失敗しました。\n\nこれは、必要以上に古いバージョンのRimWorldを実行しているのが原因です。\n\nあなたのゲームバージョンは{0}です。Prepare-Carefullyを利用するには、少なくともバージョン{1}が必要です。\n\n問題が解決するかどうかを確認するためには、最低限必要なバージョン以上に更新してください。
+    </EdB.PC.Error.GameVersion>
+    <EdB.PC.Error.Initialization>
+        PrepareCarefullyの初期化に失敗しました。\n\nこれはほとんどのこのModと別のModの間で生じる予期しない問題が原因で予期せぬ挙動をしますが、このModが原因の場合もあります。\n\nエラーを報告する前に、問題の原因となっているMODを特定してください。あなたがModsをたくさん動作させている場合、あなたは問題を引き起こしているものを見つけるまで、このModsを無効にしてすることができます。
+    </EdB.PC.Error.Initialization>
+
+    <EdB.PC.Pawn.AgeWithChronological>{0} ({1})</EdB.PC.Pawn.AgeWithChronological>
+    <EdB.PC.Pawn.AgeWithoutChronological>{0}</EdB.PC.Pawn.AgeWithoutChronological>
+    <EdB.PC.Pawn.BodyType.Average>平均的</EdB.PC.Pawn.BodyType.Average>
+    <EdB.PC.Pawn.BodyType.Heavyset>太め</EdB.PC.Pawn.BodyType.Heavyset>
+    <EdB.PC.Pawn.BodyType.Hulking>筋肉</EdB.PC.Pawn.BodyType.Hulking>
+    <EdB.PC.Pawn.BodyType.Oval>卵形</EdB.PC.Pawn.BodyType.Oval>
+    <EdB.PC.Pawn.BodyType.Thin>貧弱</EdB.PC.Pawn.BodyType.Thin>
+    <EdB.PC.Pawn.BodyType.Unnamed>名無</EdB.PC.Pawn.BodyType.Unnamed>
+    <EdB.PC.Pawn.HiddenPawnDescriptionWithGender>{0}, {1}</EdB.PC.Pawn.HiddenPawnDescriptionWithGender>
+    <EdB.PC.Pawn.HiddenPawnDescriptionNoGender>{0}</EdB.PC.Pawn.HiddenPawnDescriptionNoGender>
+    <EdB.PC.Pawn.HiddenPawnNameFull>名前不明{0}</EdB.PC.Pawn.HiddenPawnNameFull>
+    <EdB.PC.Pawn.HiddenPawnNameShort>名前不明{0}</EdB.PC.Pawn.HiddenPawnNameShort>
+    <EdB.PC.Pawn.HiddenPawnProfession>職業不明</EdB.PC.Pawn.HiddenPawnProfession>
+    <EdB.PC.Pawn.PawnDescriptionWithGender>{0}, {1}, 年齢 {2}</EdB.PC.Pawn.PawnDescriptionWithGender>
+    <EdB.PC.Pawn.PawnDescriptionNoGender>{0}, 年齢 {1}</EdB.PC.Pawn.PawnDescriptionNoGender>
+    <EdB.PC.Pawn.PawnLayer.Accessory>装飾品</EdB.PC.Pawn.PawnLayer.Accessory>
+    <EdB.PC.Pawn.PawnLayer.AlienAddonOption>オプション{0}</EdB.PC.Pawn.PawnLayer.AlienAddonOption>
+    <EdB.PC.Pawn.PawnLayer.Beard>ヒゲ</EdB.PC.Pawn.PawnLayer.Beard>
+    <EdB.PC.Pawn.PawnLayer.BodyTattoo>入墨(身体)</EdB.PC.Pawn.PawnLayer.BodyTattoo>
+    <EdB.PC.Pawn.PawnLayer.BodyType>体型</EdB.PC.Pawn.PawnLayer.BodyType>
+    <EdB.PC.Pawn.PawnLayer.BottomClothingLayer>上半身(下着)</EdB.PC.Pawn.PawnLayer.BottomClothingLayer>
+    <EdB.PC.Pawn.PawnLayer.EyeCovering>眼層</EdB.PC.Pawn.PawnLayer.EyeCovering>
+    <EdB.PC.Pawn.PawnLayer.FaceTattoo>入墨(顔)</EdB.PC.Pawn.PawnLayer.FaceTattoo>
+    <EdB.PC.Pawn.PawnLayer.Hair>髪型</EdB.PC.Pawn.PawnLayer.Hair>
+    <EdB.PC.Pawn.PawnLayer.Hat>帽子</EdB.PC.Pawn.PawnLayer.Hat>
+    <EdB.PC.Pawn.PawnLayer.HeadType>頭の形</EdB.PC.Pawn.PawnLayer.HeadType>
+    <EdB.PC.Pawn.PawnLayer.MiddleClothingLayer>上半身(中間)</EdB.PC.Pawn.PawnLayer.MiddleClothingLayer>
+    <EdB.PC.Pawn.PawnLayer.Pants>パンツ</EdB.PC.Pawn.PawnLayer.Pants>
+    <EdB.PC.Pawn.PawnLayer.TopClothingLayer>上半身(上着)</EdB.PC.Pawn.PawnLayer.TopClothingLayer>
+    <EdB.PC.Pawn.TemporaryPawnNameFull>一時的{0}</EdB.PC.Pawn.TemporaryPawnNameFull>
+    <EdB.PC.Pawn.TemporaryPawnNameShort>仮{0}</EdB.PC.Pawn.TemporaryPawnNameShort>
+
+    <EdB.PC.Page.Button.LoadPreset>プリセットをロード</EdB.PC.Page.Button.LoadPreset>
+    <EdB.PC.Page.Button.PrepareCarefully>入植者を編集する</EdB.PC.Page.Button.PrepareCarefully>
+    <EdB.PC.Page.Button.SavePreset>プリセットをセーブ</EdB.PC.Page.Button.SavePreset>
+    <EdB.PC.Page.ConfirmExit>本当に入植者を編集しなくてよろしいですか？あなたが行った変更は失われます。</EdB.PC.Page.ConfirmExit>
+    <EdB.PC.Page.ConfirmStart>カスタマイズを完了したことは確かですか？ 始める準備が整ったことを確認してください！</EdB.PC.Page.ConfirmStart>
+    <EdB.PC.Page.Points.CostSummary.Total>消費合計点: {0}</EdB.PC.Page.Points.CostSummary.Total>
+    <EdB.PC.Page.Points.CostSummary.Equipment>装備: {0}</EdB.PC.Page.Points.CostSummary.Equipment>
+    <EdB.PC.Page.Points.CostSummary.Apparel>衣類: {0}</EdB.PC.Page.Points.CostSummary.Apparel>
+    <EdB.PC.Page.Points.CostSummary.Colonist>{0}: {1}</EdB.PC.Page.Points.CostSummary.Colonist>
+    <EdB.PC.Page.Points.CostSummary.Implants>インプラント: {0}</EdB.PC.Page.Points.CostSummary.Implants>
+    <EdB.PC.Page.Points.NotEnoughPoints>ポイントを消費し過ぎです。</EdB.PC.Page.Points.NotEnoughPoints>
+    <EdB.PC.Page.Points.Remaining>残りポイント: {0}</EdB.PC.Page.Points.Remaining>
+    <EdB.PC.Page.Points.ScenarioPoints>このシナリオのために無作為に生成された植民地と植民地は、{0}ポイントの価値があった。
+    </EdB.PC.Page.Points.ScenarioPoints>
+    <EdB.PC.Page.Points.Spent>ポイント消費: {0}</EdB.PC.Page.Points.Spent>
+    <EdB.PC.Page.Points.Unlimited>無制限</EdB.PC.Page.Points.Unlimited>
+    <EdB.PC.Page.Points.UsePoints>使用可能なポイント</EdB.PC.Page.Points.UsePoints>
+    <EdB.PC.Page.Points.UsePoints.Tip>
+        \n　　スキルの選択や入植者の追加、設備の追加に対して一定数の利用可能なポイントを支払うことで、バランスのとれたスタートを維持したい場合は、ポイント制限を有効にします。開始時のポイントは、選択したシナリオでランダムに生成された文字とリソースのポイントコストと一致します。\n\n　　ポイントによる制限を無効化すれば開始前にコロニーを無制限に準備できます。\n　
+    </EdB.PC.Page.Points.UsePoints.Tip>
+    <EdB.PC.Page.Title>入植者を編集する</EdB.PC.Page.Title>
+
+    <EdB.PC.Panel.Abilities.None>超能力なし</EdB.PC.Panel.Abilities.None>
+
+    <EdB.PC.Panel.Age.Biological>肉体年齢</EdB.PC.Panel.Age.Biological>
+    <EdB.PC.Panel.Age.Chronological>暦上の年齢</EdB.PC.Panel.Age.Chronological>
+
+    <EdB.PC.Panel.Appearance.ApparelConflict.Description>選択した{0}は次の衣服と一緒に着れません:
+    </EdB.PC.Panel.Appearance.ApparelConflict.Description>
+    <EdB.PC.Panel.Appearance.ApparelConflict.LineItem>- {0}</EdB.PC.Panel.Appearance.ApparelConflict.LineItem>
+    <EdB.PC.Panel.Appearance.NoneSelected>なし</EdB.PC.Panel.Appearance.NoneSelected>
+    <EdB.PC.Panel.Appearance.WorldPawnAlert>
+        ゲームはしばしばワールドの登場人物を「服装を強制」して、地図上に彼らを出す前に新しい服や装備を与えます。\nカスタム衣服オプションを選択すると、これらのカスタマイズは、そのキャラクターに遭遇した際に、それらのカスタマイズした衣服の設定が失われる可能性があります。\n\nただし派閥指導者の場合はそうではありません。\nこのキャラクターを派閥指導者にすると、衣服のカスタマイズが保存されます。
+    </EdB.PC.Panel.Appearance.WorldPawnAlert>
+
+    <EdB.PC.Panel.AvailableEquipment.Add>装備を追加</EdB.PC.Panel.AvailableEquipment.Add>
+    <EdB.PC.Panel.AvailableEquipment.Materials.All>資材全て</EdB.PC.Panel.AvailableEquipment.Materials.All>
+    <EdB.PC.Panel.AvailableEquipment.Materials.None>資材なし</EdB.PC.Panel.AvailableEquipment.Materials.None>
+
+    <EdB.PC.Panel.ColonyPawnList.Title>コロニー</EdB.PC.Panel.ColonyPawnList.Title>
+
+    <EdB.PC.Panel.Health.Error.MustSelectBodyPart>部位を選択して下さい</EdB.PC.Panel.Health.Error.MustSelectBodyPart>
+    <EdB.PC.Panel.Health.Error.MustSelectImplant>埋め込むインプラントを選択して下さい</EdB.PC.Panel.Health.Error.MustSelectImplant>
+    <EdB.PC.Panel.Health.Error.MustSelectOption>オプションを選択して下さい</EdB.PC.Panel.Health.Error.MustSelectOption>
+    <EdB.PC.Panel.Health.Error.MustSelectSeverity>症状の段階を選択して下さい</EdB.PC.Panel.Health.Error.MustSelectSeverity>
+    <EdB.PC.Panel.Health.HediffTypeInjury>怪我や健康状態を追加</EdB.PC.Panel.Health.HediffTypeInjury>
+    <EdB.PC.Panel.Health.HediffTypeImplant>インプラントを１つ追加</EdB.PC.Panel.Health.HediffTypeImplant>
+    <EdB.PC.Panel.Health.InjuryLabel.Stage>{0}, {1}</EdB.PC.Panel.Health.InjuryLabel.Stage>
+    <EdB.PC.Panel.Health.InjuryLabel.Severity>{0}</EdB.PC.Panel.Health.InjuryLabel.Severity>
+    <EdB.PC.Panel.Health.None>怪我や病状、インプラントはありません</EdB.PC.Panel.Health.None>
+    <EdB.PC.Panel.Health.SelectBodyPart>部位を選択</EdB.PC.Panel.Health.SelectBodyPart>
+    <EdB.PC.Panel.Health.SelectSeverity>症状の段階を選択</EdB.PC.Panel.Health.SelectSeverity>
+
+    <EdB.PC.Panel.Incapable.None>なし</EdB.PC.Panel.Incapable.None>
+    <EdB.PC.Panel.Incapable.Warning>
+        入植者達の誰もバニラで必要と考えられている仕事の種類を行う事ができません。\n\n{0}\n\nあなたが選んだ入植者でゲームをプレイすることはできますが、シナリオを開始する前に確認のメッセージが表示されます。
+    </EdB.PC.Panel.Incapable.Warning>
+    <EdB.PC.Panel.Incapable.WarningItem>－{0}</EdB.PC.Panel.Incapable.WarningItem>
+
+    <EdB.PC.Panel.LoadSave.Load>キャラをロード</EdB.PC.Panel.LoadSave.Load>
+    <EdB.PC.Panel.LoadSave.Save>キャラをセーブ</EdB.PC.Panel.LoadSave.Save>
+
+    <EdB.PC.Panel.PawnList.Add>追加...</EdB.PC.Panel.PawnList.Add>
+    <EdB.PC.Panel.PawnList.Delete.Confirm>このキャラクターを削除してもよろしいですか？</EdB.PC.Panel.PawnList.Delete.Confirm>
+    <EdB.PC.Panel.PawnList.Error.FactionPawnFailed>新しいキャラクターを作成しようとした際に予期しないエラーが発生しました。
+    </EdB.PC.Panel.PawnList.Error.FactionPawnFailed>
+    <EdB.PC.Panel.PawnList.Error.MustSelectFaction>派閥を選択してください</EdB.PC.Panel.PawnList.Error.MustSelectFaction>
+    <EdB.PC.Panel.PawnList.Load>ロード...</EdB.PC.Panel.PawnList.Load>
+    <EdB.PC.Panel.PawnList.PawnCount>({0})</EdB.PC.Panel.PawnList.PawnCount>
+    <EdB.PC.Panel.PawnList.SelectFaction>派閥の中から選択</EdB.PC.Panel.PawnList.SelectFaction>
+
+    <EdB.PC.Panel.RelationshipsOther.Title>他の人間関係</EdB.PC.Panel.RelationshipsOther.Title>
+
+    <EdB.PC.Panel.RelationshipsParentChild.Title>親子関係</EdB.PC.Panel.RelationshipsParentChild.Title>
+
+    <EdB.PC.Panel.SelectedEquipment.Remove>物資を削除</EdB.PC.Panel.SelectedEquipment.Remove>
+
+    <EdB.PC.Panel.Skills.ResetTip>すべてのスキルと情熱を元に戻す</EdB.PC.Panel.Skills.ResetTip>
+    <EdB.PC.Panel.Skills.ClearTip>すべてのスキルと情熱を可能な限り低いレベルに設定してクリアする</EdB.PC.Panel.Skills.ClearTip>
+
+    <EdB.PC.Panel.Titles.Header>爵位</EdB.PC.Panel.Titles.Header>
+    <EdB.PC.Panel.Titles.None>爵位なし</EdB.PC.Panel.Titles.None>
+
+    <EdB.PC.Panel.Traits.None>トレイトなし</EdB.PC.Panel.Traits.None>
+    <EdB.PC.Panel.Traits.Tip.Conflict>{0}\n\n次のトレイトと衝突:\n{1}</EdB.PC.Panel.Traits.Tip.Conflict>
+    <EdB.PC.Panel.Traits.Tip.Conflict.List.1>－{0}</EdB.PC.Panel.Traits.Tip.Conflict.List.1>
+    <EdB.PC.Panel.Traits.Tip.Conflict.List.2>－{0}\n－{1}</EdB.PC.Panel.Traits.Tip.Conflict.List.2>
+    <EdB.PC.Panel.Traits.Tip.Conflict.List.Many>－{0}\n{1}</EdB.PC.Panel.Traits.Tip.Conflict.List.Many>
+    <EdB.PC.Panel.Traits.Tip.Conflict.List.Last>－{0}\n－{1}</EdB.PC.Panel.Traits.Tip.Conflict.List.Last>
+
+    <EdB.PC.TabView.Animals.Title>ペット</EdB.PC.TabView.Animals.Title>
+    <EdB.PC.TabView.Equipment.Title>装備</EdB.PC.TabView.Equipment.Title>
+    <EdB.PC.TabView.Pawns.Title>キャラクター</EdB.PC.TabView.Pawns.Title>
+    <EdB.PC.TabView.Relationships.Title>人間関係</EdB.PC.TabView.Relationships.Title>
+
+    <EdB.PC.Panel.WorldPawnList.Title>ワールド</EdB.PC.Panel.WorldPawnList.Title>
+
+</LanguageData>

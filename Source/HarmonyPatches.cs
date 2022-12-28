@@ -72,10 +72,16 @@ internal class ReplaceScenarioPatch {
 [HarmonyPatch(new[] { typeof(Rect) })]
 internal class PrepareCarefullyButtonPatch {
     private static void Postfix(Page_ConfigureStartingPawns __instance, ref Rect rect) {
-        var BottomButSize = new Vector2(150f, 38f);
-        var num = rect.height + 45f;
-        var rect4 = new Rect(rect.x + (rect.width / 2f) - (BottomButSize.x / 2f), num, BottomButSize.x,
-            BottomButSize.y);
+        var bottomButSize = new Vector2(150f, 38f);
+        var rect4 = new Rect(
+            (rect.width - bottomButSize.x) / 2f,
+            rect.y + rect.height + 10f,
+            bottomButSize.x,
+            bottomButSize.y
+        );
+        if (ModsConfig.BiotechActive) {
+            rect4.x += bottomButSize.x + 20f;
+        }
 
         if (!Widgets.ButtonText(rect4, "EdB.PC.Page.Button.PrepareCarefully".Translate(), true, false)) {
             return;

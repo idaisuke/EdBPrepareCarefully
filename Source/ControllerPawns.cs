@@ -187,28 +187,27 @@ public class ControllerPawns {
 
     // Age-related actions.
     public void UpdateBiologicalAge(int age) {
-        var min = providerAgeLimits.MinAgeForPawn(state.CurrentPawn.Pawn);
-        var max = providerAgeLimits.MaxAgeForPawn(state.CurrentPawn.Pawn);
-        if (age < min) {
-            age = min;
-        }
-        else if (age > max || age > state.CurrentPawn.ChronologicalAge) {
-            age = age > max ? max : state.CurrentPawn.ChronologicalAge;
+        var currentPawn = state.CurrentPawn;
+        if (currentPawn == null) {
+            return;
         }
 
-        state.CurrentPawn.BiologicalAge = age;
+        currentPawn.BiologicalAge = age;
+        if (currentPawn.ChronologicalAge < age) {
+            currentPawn.ChronologicalAge = age;
+        }
     }
 
     public void UpdateChronologicalAge(int age) {
-        if (age < state.CurrentPawn.BiologicalAge) {
-            age = state.CurrentPawn.BiologicalAge;
+        var currentPawn = state.CurrentPawn;
+        if (currentPawn == null) {
+            return;
         }
 
-        if (age > Constraints.AgeChronologicalMax) {
-            age = Constraints.AgeChronologicalMax;
+        currentPawn.ChronologicalAge = age;
+        if (currentPawn.BiologicalAge > age) {
+            currentPawn.BiologicalAge = age;
         }
-
-        state.CurrentPawn.ChronologicalAge = age;
     }
 
     // Appearance-related actions.

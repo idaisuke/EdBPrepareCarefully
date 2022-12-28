@@ -67,6 +67,11 @@
     <Compile Include="Source\AnimalDatabase.cs" />
     <Compile Include="Source\AnimalRecord.cs" />
     <Compile Include="Source\AnimalRecordKey.cs" />
+    <Compile Include="Source\Version1400\PawnLoaderV1400.cs" />
+    <Compile Include="Source\Version1400\PresetLoaderV1400.cs" />
+    <Compile Include="Source\Version1400\SaveRecordPawnV1400.cs" />
+    <Compile Include="Source\Version1400\SaveRecordTraitV1400.cs" />
+    <Compile Include="Source\Version1400\SaveRecordTraitGeneBiotechV1.cs" />
     <Compile Include="Source\DialogAbilities.cs" />
     <Compile Include="Source\DialogIdeos.cs" />
     <Compile Include="Source\ColonistFiles.cs" />
